@@ -1,0 +1,27 @@
+<%- include("./partials/header.ejs") %>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 login-container">
+            <h2 class="text-center text-white">Giriş Yap</h2>
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <label for="username" class="text-white">Kullanıcı Adı veya E-posta</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="text-white">Şifre</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-login btn-block">Giriş Yap</button>
+            </form>
+            <hr class="my-4">
+            <button class="btn btn-google btn-block">
+                <span class="google-icon">G</span>
+                Google ile Giriş Yap
+            </button>
+        </div>
+    </div>
+</div>
+
+<%- include("./partials/footer.ejs") %>
