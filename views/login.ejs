@@ -1,27 +1,50 @@
-<%- include("./partials/header.ejs") %>
+<body class="log-reg-body">
+  <%- include("./partials/header.ejs") %>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6 login-container">
-            <h2 class="text-center text-white">Giriş Yap</h2>
-            <form action="/login" method="POST">
-                <div class="form-group">
-                    <label for="username" class="text-white">Kullanıcı Adı veya E-posta</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password" class="text-white">Şifre</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn btn-login btn-block">Giriş Yap</button>
-            </form>
-            <hr class="my-4">
-            <button class="btn btn-google btn-block">
-                <span class="google-icon">G</span>
-                Google ile Giriş Yap
+  <div class="log-reg-box">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 log-reg-container">
+          <h2 class="text-center text-white">
+            Giriş Yap <i class="fas fa-key fa-1x"></i>
+          </h2>
+          <form action="/login" method="POST">
+            <div class="form-group">
+              <label for="username" class="text-white"
+                >Kullanıcı Adı veya E-posta</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="password" class="text-white">Şifre</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-log-reg btn-block">
+              Giriş Yap
             </button>
-        </div>
-    </div>
-</div>
+          </form>
+          <hr class="my-4" />
 
-<%- include("./partials/footer.ejs") %>
+          <a href="/auth/google" class="btn btn-google btn-block">
+            <i class="fab fa-google"></i>
+            Sign In with Google
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+</body>

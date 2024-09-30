@@ -1,17 +1,18 @@
-body {
-    background-image: url('../images/background.png');
+.log-reg-body {
+    background-image: url('../images/background_log.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     background-attachment: fixed;
 }
 
-.login-container {
+.log-reg-container {
     background-color: rgba(43, 43, 49, 0.9);
     border-radius: 10px;
     padding: 30px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     margin-top: 100px;
+    margin-bottom: 50px;
 }
 
 .btn-google {
@@ -19,31 +20,19 @@ body {
     color: white;
 }
 
-.btn-login {
+.btn-log-reg {
     background-color: #FFA500;
     font-weight: bold;
+    color: white;
 }
 
-.btn-login:hover {
+.btn-log-reg:hover {
     background-color: #cc9a3d;
 }
 
-.google-icon {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-color: #4285F4;
-    color: white;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 20px;
-    font-weight: bold;
-    font-size: 18px;
-    margin-right: 8px;
-}
 
-footer p{
-    text-align: center; /* Footer'ı ortalamak için */
-    padding: 10px 0; /* İç boşluk */
-    color: white; /* Yazı rengi */
+footer p {
+    text-align: center;
+    padding: 10px 0;
+    color: white;
 }

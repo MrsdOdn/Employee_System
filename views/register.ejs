@@ -1,0 +1,94 @@
+<body class="log-reg-body">
+  <%- include("./partials/header.ejs") %>
+
+  <div class="log-reg-box">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 log-reg-container">
+          <h2 class="text-center text-white">
+            Kayıt Ol <i class="fas fa-user-plus"></i>
+          </h2>
+          <form action="/register" method="POST">
+            <div class="form-group">
+              <label for="tcNo" class="text-white">TC Kimlik No</label>
+              <input
+                type="text"
+                class="form-control"
+                id="tcNo"
+                name="tcNo"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="firstName" class="text-white">Ad</label>
+              <input
+                type="text"
+                class="form-control"
+                id="firstName"
+                name="firstName"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="lastName" class="text-white">Soyad</label>
+              <input
+                type="text"
+                class="form-control"
+                id="lastName"
+                name="lastName"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="email" class="text-white">E-posta</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="phone" class="text-white">Telefon Numarası</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="phone"
+                name="phone"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="password" class="text-white">Parola</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword" class="text-white"
+                >Parola Doğrulama</label
+              >
+              <input
+                type="password"
+                class="form-control"
+                id="confirmPassword"
+                name="confirmPassword"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-log-reg btn-block">
+              Kayıt Ol
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+</body>
