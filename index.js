@@ -3,15 +3,18 @@ import bodyParser from "body-parser";
 import passport from "passport";
 import session from "express-session";
 import authMiddleware from "./middleware/authMiddleware.js";
-import authRoutes from "./auth.js"; 
+import authRoutes from "./auth.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
 const port = 3000;
 
 // Oturum yönetimi
 app.use(session({
-    secret: "your-secret-key", // Bu anahtarı gizli tut!
+    secret: process.env.SESSION_SECRET,
     resave: false,
+    // Oturuma herhangi bir veri kaydedilmediğinde, oturumu kaydetme.
     saveUninitialized: false
 }));
 
@@ -21,7 +24,7 @@ app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// Ana sayfa (herkes erişebilir)
+
 app.get("/", (req, res) => {
     res.render("home.ejs");
 });

@@ -30,12 +30,13 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+    console.log('User serialized:', user);
+    done(null, user.employee_id);
 });
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const result = await db.query("SELECT * FROM employees WHERE id = $1", [id]);
+        const result = await db.query("SELECT * FROM employees WHERE employee_id = $1", [id]);
         if (result.rows.length > 0) {
             done(null, result.rows[0]);
         } else {
@@ -48,7 +49,21 @@ passport.deserializeUser(async (id, done) => {
 
 // Kayıt rotası
 router.post("/register", async (req, res) => {
-    const { tc_no, first_name, last_name, email, phone_number, password } = req.body;
+    const { tcNo, firstName, lastName, email, phone, password, confirmPassword } = req.body;
+
+    const tcRegex = /^\d{11}$/;
+    const phoneRegex = /^\d{10,15}$/;
+
+    if (!tcRegex.test(tcNo)) {
+        return res.status(400).send("TC Kimlik No 11 haneli olmalı");
+    }
+    if (!phoneRegex.test(phone)) {
+        return res.status(400).send("Geçerli bir telefon numarası girin");
+    }
+    if (password !== confirmPassword) {
+        return res.status(400).send("Parola ve Parola Doğrulama uyuşmuyor");
+    }
+
     try {
         const checkResult = await db.query("SELECT * FROM employees WHERE email = $1", [email]);
         if (checkResult.rows.length > 0) {
@@ -57,8 +72,8 @@ router.post("/register", async (req, res) => {
 
         const hash = await bcrypt.hash(password, saltRounds);
         const result = await db.query(
-            "INSERT INTO employees (tc_no,first_name,last_name,email,phone_number,password_hash) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
-            [tc_no, first_name, last_name, email, phone_number, hash]
+            "INSERT INTO employees (tc_no, first_name, last_name, email, phone_number, password_hash) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [tcNo, firstName, lastName, email, phone, hash]
         );
 
         req.login(result.rows[0], (err) => {
@@ -73,6 +88,7 @@ router.post("/register", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
 
 // Giriş rotası
 router.post("/login", passport.authenticate("local", {
