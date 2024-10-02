@@ -1,3 +1,27 @@
+:root {
+    --white: #ffffff;
+    --dark-red: #8B0000;
+    --light-red: #FF6347;
+    --light-green: #009485ff;
+    --dark-green: #00695c;
+    --dark-orange: #FFA500;
+    --light-orange: #ffcc80;
+    --black1: #2b2b31e6;
+    --light-black: #4b4b4b;
+    --black2: #00000033;
+}
+*{
+    margin: 0;
+    padding: 0;
+    /*sayfa düzenini bozmadan öğe boyutlarını sabit tutmayı sağlar*/
+    box-sizing: border-box;
+}
+
+body{
+    min-height: 100vh;
+}
+
+
 .log-reg-body {
     background-image: url('../images/background_log.png');
     background-size: cover;
@@ -7,32 +31,25 @@
 }
 
 .log-reg-container {
-    background-color: rgba(43, 43, 49, 0.9);
+    background-color: var(--black1);
     border-radius: 10px;
     padding: 30px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px var(--black2);
     margin-top: 100px;
     margin-bottom: 50px;
 }
 
 .btn-google {
-    background-color: #009485ff;
-    color: white;
+    background-color: var(--light-green);
+    color: var(--white);
 }
 
 .btn-log-reg {
-    background-color: #FFA500;
+    background-color: var(--dark-orange);
     font-weight: bold;
     color: white;
 }
 
 .btn-log-reg:hover {
-    background-color: #cc9a3d;
-}
-
-
-footer p {
-    text-align: center;
-    padding: 10px 0;
-    color: white;
+    background-color: var(--light-orange);
 }
