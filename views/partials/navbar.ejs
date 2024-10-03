@@ -4,39 +4,45 @@
       <li>
         <a href="#">
           <div class="user icon">
-            <img src="../../images/profil.png" />
+            <img src="<%= profileImage %>" alt="Profil Resmi" />
           </div>
-          <span class="title"><%= name%> <%= surname%></span>
+          <span class="title"><%= name %> <%= surname %></span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li data-active="home">
+        <a href="/home">
           <span class="icon"><ion-icon name="home"></ion-icon></span>
           <span class="title">Ana Sayfa</span>
         </a>
       </li>
-      <li>
+      <li data-active="duyurular">
         <a href="/duyurular">
           <span class="icon"><ion-icon name="notifications"></ion-icon></span>
           <span class="title">Duyurular</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li data-active="profil">
+        <a href="/profil">
           <span class="icon"><ion-icon name="person-circle"></ion-icon></span>
           <span class="title">Profil</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li data-active="sifre">
+        <a href="/sifre">
           <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-          <span class="title">Password</span>
+          <span class="title">Şifre İşlemleri</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li data-active="admin">
+        <a href="/admin">
+          <span class="icon"><ion-icon name="skull"></ion-icon></span>
+          <span class="title">Admin Paneli</span>
+        </a>
+      </li>
+      <li data-active="logout">
+        <a href="/logout">
           <span class="icon"><ion-icon name="log-out"></ion-icon></span>
-          <span class="title">Sign Out</span>
+          <span class="title">Çıkış Yap</span>
         </a>
       </li>
     </ul>
@@ -55,23 +61,36 @@
     </div>
   </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  let toggle = document.querySelector(".toggle");
-  let navigation = document.querySelector(".navigation");
-  let main = document.querySelector(".main");
+  let toggle = $(".toggle");
+  $(document).ready(function () {
+    let navigation = $(".navigation");
+    let main = $(".main");
+    let list = $(".navigation li");
+    let content = $(".content");
 
-  toggle.onclick = function () {
-    navigation.classList.toggle("active");
-    main.classList.toggle("active");
-  };
+    const currentPath = window.location.pathname;
+    list.each(function () {
+      const link = $(this).find("a").attr("href");
+      if (link === currentPath) {
+        $(this).addClass("hovered");
+      }
+    });
 
-  let list = document.querySelectorAll(".navigation li");
-  function activeLink() {
-    list.forEach((item) => item.classList.remove("hovered"));
-    this.classList.add("hovered");
-  }
-  list.forEach((item) => item.addEventListener("mouseover", activeLink));
+    $(".toggle").on("click", function () {
+      navigation.toggleClass("active");
+      main.toggleClass("active");
+      content.toggleClass("active");
+    });
+
+    list.on("click", function () {
+      list.removeClass("hovered");
+      $(this).addClass("hovered");
+    });
+  });
 </script>
+
 <script
   type="module"
   src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"

@@ -120,12 +120,28 @@
     position: relative;
     width: calc(100% - 250px);
     left: 250px;
-    min-height: 100vh;
+    min-height: 65px;
     background: var(--white);
     transition: 0.5s;
 }
 
 .main.active {
+    width: calc(100% - 80px);
+    left: 80px;
+}
+
+.content {
+    position: absolute;
+    top: 65px;
+    left: 250px;
+    width: calc(100% - 250px);
+    min-height: calc(100vh - 65px);
+    transition: left 0.5s, width 0.5s;
+    background: var(--white);
+    padding: 0 10px 0 10px;
+}
+
+.content.active {
     width: calc(100% - 80px);
     left: 80px;
 }
@@ -154,6 +170,7 @@
     position: relative;
     width: 400px;
     margin: 0 10px;
+
 }
 
 .search label {

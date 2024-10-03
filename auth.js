@@ -72,8 +72,8 @@ router.post("/register", async (req, res) => {
 
         const hash = await bcrypt.hash(password, saltRounds);
         const result = await db.query(
-            "INSERT INTO employees (tc_no, first_name, last_name, email, phone_number, password_hash) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-            [tcNo, firstName, lastName, email, phone, hash]
+            "INSERT INTO employees (tc_no, first_name, last_name, email, phone_number, password_hash, profile_image) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            [tcNo, firstName, lastName, email, phone, hash, "../../images/profil.png"]
         );
 
         req.login(result.rows[0], (err) => {
@@ -81,7 +81,7 @@ router.post("/register", async (req, res) => {
                 console.error(err);
                 return res.redirect("/register");
             }
-            return res.redirect("/");
+            return res.redirect("/home");
         });
     } catch (err) {
         console.error(err);
@@ -92,7 +92,7 @@ router.post("/register", async (req, res) => {
 
 // Giriş rotası
 router.post("/login", passport.authenticate("local", {
-    successRedirect: "/", //ilerleyen zamanda değişecek.
+    successRedirect: "/home", //ilerleyen zamanda değişecek.
     failureRedirect: "/login"
 }));
 

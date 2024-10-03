@@ -10,16 +10,19 @@
     --light-black: #4b4b4b;
     --black2: #00000033;
 }
-*{
+
+* {
     margin: 0;
     padding: 0;
     /*sayfa düzenini bozmadan öğe boyutlarını sabit tutmayı sağlar*/
     box-sizing: border-box;
 }
 
-body{
+body {
     min-height: 100vh;
 }
+
+
 
 
 .log-reg-body {
@@ -28,6 +31,7 @@ body{
     background-repeat: no-repeat;
     background-position: center;
     background-attachment: fixed;
+
 }
 
 .log-reg-container {
@@ -37,6 +41,7 @@ body{
     box-shadow: 0 4px 8px var(--black2);
     margin-top: 100px;
     margin-bottom: 50px;
+    max-width: 50%;
 }
 
 .btn-google {
@@ -52,4 +57,33 @@ body{
 
 .btn-log-reg:hover {
     background-color: var(--light-orange);
+}
+
+/* 600px ve altı için (mobil cihazlar) */
+@media only screen and (max-width: 600px) {
+    body {
+        font-size: 14px;
+    }
+
+    .log-reg-container {
+        max-width: 50%;
+    }
+
+    .navbar {
+        display: none;
+        /* Mobilde navbar'ı gizle */
+    }
+}
+
+/* Daha büyük ekranlar için değişiklikler */
+@media only screen and (min-width: 768px) {
+    .log-reg-container {
+        max-width: 35%;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    .log-reg-container {
+        max-width: 35%;
+    }
 }
