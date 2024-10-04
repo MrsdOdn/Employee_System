@@ -1,0 +1,210 @@
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <button
+      class="nav-link active"
+      id="nav-home-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-home"
+      type="button"
+      role="tab"
+      aria-controls="nav-home"
+      aria-selected="true"
+    >
+      Home
+    </button>
+    <button
+      class="nav-link"
+      id="nav-profile-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-profile"
+      type="button"
+      role="tab"
+      aria-controls="nav-profile"
+      aria-selected="false"
+    >
+      Profile
+    </button>
+    <button
+      class="nav-link"
+      id="nav-contact-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-contact"
+      type="button"
+      role="tab"
+      aria-controls="nav-contact"
+      aria-selected="false"
+    >
+      Contact
+    </button>
+    <button
+      class="nav-link"
+      id="nav-disabled-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-disabled"
+      type="button"
+      role="tab"
+      aria-controls="nav-disabled"
+      aria-selected="false"
+      disabled
+    >
+      Disabled
+    </button>
+  </div>
+</nav>
+
+<div class="tab-content" id="nav-tabContent">
+  <div
+    class="tab-pane fade show active"
+    id="nav-home"
+    role="tabpanel"
+    aria-labelledby="nav-home-tab"
+    tabindex="0"
+  >
+    home
+  </div>
+  <div
+    class="tab-pane fade"
+    id="nav-profile"
+    role="tabpanel"
+    aria-labelledby="nav-profile-tab"
+    tabindex="0"
+  >
+    profile
+  </div>
+  <div
+    class="tab-pane fade"
+    id="nav-contact"
+    role="tabpanel"
+    aria-labelledby="nav-contact-tab"
+    tabindex="0"
+  >
+    contact
+  </div>
+  <div
+    class="tab-pane fade"
+    id="nav-disabled"
+    role="tabpanel"
+    aria-labelledby="nav-disabled-tab"
+    tabindex="0"
+  >
+    disabled
+  </div>
+</div>
+
+<h1 class="text-center mb-4">Çalışanlar Tablosu</h1>
+
+<!-- Alan seçimi için Select2 -->
+<div class="mb-3">
+  <label>Göstermek istediğiniz alanları seçin:</label>
+  <select id="column-select" class="form-control" multiple="multiple">
+    <option value="0">Ad-Soyad</option>
+    <option value="1">Email</option>
+    <option value="2">Telefon</option>
+    <option value="3">İşlem</option>
+  </select>
+</div>
+
+<!-- Tablo yapısı -->
+<table
+  id="employees"
+  class="display table table-striped nowrap"
+  style="width: 100%"
+>
+  <thead>
+    <tr>
+      <th>Ad-Soyad</th>
+      <th>Email</th>
+      <th>Telefon</th>
+      <th>İşlem</th>
+    </tr>
+    <tr>
+      <th><input type="text" placeholder="Ara..." /></th>
+      <th><input type="text" placeholder="Ara..." /></th>
+      <th><input type="text" placeholder="Ara..." /></th>
+      <th><input type="text" placeholder="Ara..." /></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% employees.forEach(employee => { %>
+    <tr>
+      <td><%= employee.first_name %> <%= employee.last_name %></td>
+      <td><%= employee.email %></td>
+      <td><%= employee.phone_number %></td>
+      <td>
+        <a href="/edit/<%= employee.id %>" class="btn btn-warning btn-sm"
+          >Düzenle</a
+        >
+        <a
+          href="/delete/<%= employee.id %>"
+          class="btn btn-danger btn-sm"
+          onclick="return confirm('Silmek istediğinize emin misiniz?')"
+          >Sil</a
+        >
+      </td>
+    </tr>
+    <% }); %>
+  </tbody>
+</table>
+
+<script>
+  $(document).ready(function () {
+    // DataTable oluşturulması
+    var table = $("#employees").DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: true,
+      scrollX: true,
+      fixedColumns: {
+        leftColumns: 1, // Soldan ilk sütunu sabitler
+      },
+      language: {
+        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        zeroRecords: "Kayıt bulunamadı",
+        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+        infoEmpty: "Kayıt yok",
+        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        search: "Ara:",
+        paginate: {
+          first: "İlk",
+          last: "Son",
+          next: "Sonraki",
+          previous: "Önceki",
+        },
+      },
+    });
+
+    // Her sütundaki arama kutuları için olay dinleyicileri
+    $("#employees thead tr:eq(1) th input").each(function (i) {
+      $(this).on("keyup change clear", function () {
+        if (table.column(i).search() !== this.value) {
+          table.column(i).search(this.value).draw();
+        }
+      });
+    });
+
+    // Select2 başlatma
+    $("#column-select").select2({
+      placeholder: "Göstermek istediğiniz alanları seçin",
+    });
+
+    // Seçim değiştiğinde sütun görünürlüğünü güncelleme
+    $("#column-select").on("change", function () {
+      var selectedColumns = $(this).val(); // Seçilen sütunları al
+
+      // Tüm sütunları gizle
+      for (var i = 0; i < 4; i++) {
+        table.column(i).visible(false);
+      }
+
+      // Seçilen sütunları görünür yap
+      if (selectedColumns) {
+        $.each(selectedColumns, function (index, value) {
+          table.column(value).visible(true);
+        });
+      }
+    });
+  });
+</script>

@@ -14,7 +14,6 @@ export default {
         }
 
         const userId = req.user.employee_id;
-        console.log("UserID:", userId);
 
         try {
             const result = await db.query(`
@@ -23,8 +22,6 @@ export default {
                 INNER JOIN roles ON employee_roles.role_id = roles.role_id
                 WHERE employee_roles.employee_id = $1 AND roles.role_name = 'admin'
             `, [userId]);
-
-            console.log("Query Result:", result.rows);
             if (result.rowCount > 0) {
                 return next();
             } else {

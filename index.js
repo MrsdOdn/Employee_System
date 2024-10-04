@@ -6,11 +6,11 @@ import authMiddleware from "./middleware/authMiddleware.js";
 import authRoutes from "./auth.js";
 import dotenv from "dotenv";
 import expressLayouts from "express-ejs-layouts";
+import db from "./config/db.js";
 
 dotenv.config();
 const app = express();
 const port = 3000;
-
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -31,17 +31,17 @@ app.use(expressLayouts);
 app.set("view engine", "ejs");
 app.set("layout", "partials/layout");
 
-
-app.use((req, res, next) => {
+//kimlik sorgulama açılacak sonra
+/* app.use((req, res, next) => {
     const openRoutes = ['/', '/login', '/register'];
     if (!openRoutes.includes(req.path) && !req.isAuthenticated()) {
         return res.redirect("/login");
     }
     next();
-});
+}); */
 
 // Admin rotaları kontrol
-app.use('/admin', authMiddleware.isAuthenticated, authMiddleware.isAdmin);
+//app.use('/admin', authMiddleware.isAuthenticated, authMiddleware.isAdmin);
 
 app.use((req, res, next) => {
     if (req.isAuthenticated()) {
@@ -87,9 +87,20 @@ app.get("/admin", (req, res) => {
 app.get("/admin/duyurular", (req, res) => {
     res.render("admin/aduyurular.ejs");
 });
-app.get("/admin/calisanlar", (req, res) => {
+/* app.get("/admin/calisanlar", (req, res) => {
     res.render("admin/calisanlar.ejs");
+}); */
+
+app.get('/admin/calisanlar', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM employees');
+        res.render('admin/calisanlar.ejs', { employees: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Bir hata oluştu.');
+    }
 });
+
 app.get("/logout", (req, res) => {
     req.logout(function (err) {
       if (err) {
