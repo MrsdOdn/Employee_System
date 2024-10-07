@@ -7,6 +7,8 @@ import authRoutes from "./auth.js";
 import dotenv from "dotenv";
 import expressLayouts from "express-ejs-layouts";
 import db from "./config/db.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import moment from "moment";
 
 dotenv.config();
 const app = express();
@@ -26,6 +28,10 @@ app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+app.use((req, res, next) => {
+    res.locals.moment = moment;
+    next();
+  });
 
 app.use(expressLayouts);
 app.set("view engine", "ejs");
@@ -45,7 +51,7 @@ app.set("layout", "partials/layout");
 
 app.use((req, res, next) => {
     if (req.isAuthenticated()) {
-        res.locals.name = req.user.first_name; 
+        res.locals.name = req.user.first_name;
         res.locals.surname = req.user.last_name;
         res.locals.profileImage = req.user.profile_image;
     } else {
@@ -84,33 +90,18 @@ app.get("/sifre", (req, res) => {
 app.get("/admin", (req, res) => {
     res.render("admin/admin.ejs");
 });
-app.get("/admin/duyurular", (req, res) => {
-    res.render("admin/aduyurular.ejs");
-});
-/* app.get("/admin/calisanlar", (req, res) => {
-    res.render("admin/calisanlar.ejs");
-}); */
-
-app.get('/admin/calisanlar', async (req, res) => {
-    try {
-        const result = await db.query('SELECT * FROM employees');
-        res.render('admin/calisanlar.ejs', { employees: result.rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Bir hata oluştu.');
-    }
-});
-
+app.use('/admin', adminRoutes);
 app.get("/logout", (req, res) => {
     req.logout(function (err) {
-      if (err) {
-        return next(err);
-      }
-      res.redirect("/");
+        if (err) {
+            return next(err);
+        }
+        res.redirect("/");
     });
-  });
+});
 
 app.use("/", authRoutes);
+app.use('/admin', adminRoutes);
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}.`);

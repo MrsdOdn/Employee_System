@@ -1,0 +1,130 @@
+<div class="tab-content" id="nav-tabContent">
+  <div class="mb-3 inline-block-container">
+    <label>Gösterilecek bilgiler:</label>
+    <select id="column-select" class="form-control" multiple="multiple">
+      <option value="0">Ad-Soyad</option>
+      <option value="1">Email</option>
+      <option value="2">Telefon</option>
+      <option value="3">İşlem</option>
+    </select>
+  </div>
+</div>
+
+<table
+  id="employees"
+  class="display table table-striped nowrap"
+  style="width: 100%"
+>
+  <thead>
+    <tr>
+      <th>Çalışan ID</th>
+      <th>Ad-Soyad</th>
+      <th>Email</th>
+      <th>Telefon</th>
+      <th>İşlem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% employees.forEach(employee => { %>
+    <tr>
+      <td><%= employee.employee_id %></td>
+      <td><%= employee.first_name %> <%= employee.last_name %></td>
+      <td><%= employee.email %></td>
+      <td><%= employee.phone_number %></td>
+      <td>
+        <a href="/edit/<%= employee.id %>" class="btn btn-warning btn-sm"
+          >Düzenle</a
+        >
+        <a
+          href="/delete/<%= employee.id %>"
+          class="btn btn-danger btn-sm"
+          onclick="return confirm('Silmek istediğinize emin misiniz?')"
+          >Sil</a
+        >
+      </td>
+    </tr>
+    <% }); %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Çalışan ID</th>
+      <th>Ad-Soyad</th>
+      <th>Email</th>
+      <th>Telefon</th>
+      <th>İşlem</th>
+    </tr>
+  </tfoot>
+</table>
+
+<script>
+  $(document).ready(function () {
+    var table = $("#employees").DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: true,
+      scrollX: true,
+      fixedColumns: {
+        leftColumns: 1,
+      },
+      language: {
+        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        zeroRecords: "Kayıt bulunamadı",
+        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+        infoEmpty: "Kayıt yok",
+        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        search: "Ara:",
+        paginate: {
+          first: "İlk",
+          last: "Son",
+          next: "Sonraki",
+          previous: "Önceki",
+        },
+      },
+      initComplete: function () {
+        this.api()
+          .columns()
+          .every(function () {
+            let column = this;
+            let title = column.footer().textContent;
+
+            // Create input element
+            let input = document.createElement("input");
+            input.placeholder = title;
+            column.footer().replaceChildren(input);
+
+            // Event listener for user input
+            input.addEventListener("keyup", () => {
+              if (column.search() !== this.value) {
+                column.search(input.value).draw();
+              }
+            });
+          });
+      },
+      fixedHeader: {
+        footer: true
+    }
+    });
+
+    $("#column-select").select2({
+      placeholder: "Seçin",
+    });
+    $("#column-select").on("change", function () {
+      var selectedColumns = $(this).val();
+
+      // Tüm sütunları gizle
+      for (var i = 0; i < table.columns().count(); i++) {
+        table.column(i).visible(false);
+      }
+
+      // Seçilen sütunları görünür yap
+      if (selectedColumns) {
+        $.each(selectedColumns, function (index, value) {
+          table.column(value).visible(true);
+        });
+      }
+    });
+  });
+</script>

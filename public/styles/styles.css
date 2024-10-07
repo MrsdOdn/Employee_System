@@ -75,6 +75,32 @@ th {
     background-color: #f2f2f2;
 }
 
+.tab-icon {
+    margin-left: 5px;
+    color: var(--light-green);
+}
+
+.tab-icon-active {
+    color: var(--dark-green);
+    transform: scale(1.2);
+}
+
+.nav-link {
+    min-width: 170px;
+}
+
+.employee-h3 {
+    color: var(--black1);
+}
+
+.select2-container {
+    width: auto !important;
+    min-width: 200px;
+}
+
+tfoot input {
+    width: 100%;
+}
 
 /* 600px ve altı için (mobil cihazlar) */
 @media only screen and (max-width: 600px) {

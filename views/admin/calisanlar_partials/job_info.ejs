@@ -1,0 +1,161 @@
+<div class="tab-content" id="nav-tabContent">
+  <div class="mb-3 inline-block-container select2-container">
+    <label>Gösterilecek bilgiler:</label>
+    <select id="column-select" class="form-control" multiple="multiple">
+      <option value="0">Çalışan ID</option>
+      <option value="1">Ad-Soyad</option>
+      <option value="2">Çalıştığı Bölüm</option>
+      <option value="3">Çalıştığı Birim</option>
+      <option value="4">Çalışan Türü</option>
+      <option value="5">Unvanı</option>
+      <option value="6">Görev</option>
+      <option value="7">Yaptığı İş</option>
+      <option value="8">İşe Giriş Tarihi</option>
+      <option value="9">Çıkış Tarihi</option>
+      <option value="10">Grup</option>
+    </select>
+  </div>
+  <table
+    id="job-info"
+    class="display table table-striped nowrap"
+    style="width: 100%"
+  >
+    <thead>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Çalıştığı Bölüm</th>
+        <th>Çalıştığı Birim</th>
+        <th>Çalışan Türü</th>
+        <th>Unvanı</th>
+        <th>Görev</th>
+        <th>Yaptığı İş</th>
+        <th>İşe Giriş Tarihi</th>
+        <th>Çıkış Tarihi</th>
+        <th>Grup</th>
+        <th>İşlemler</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% job_info.forEach(job_info => { %>
+      <tr>
+        <td><%= job_info.employee_id %></td>
+        <td><%= job_info.first_name %> <%= job_info.last_name %></td>
+        <td><%= job_info.department %></td>
+        <td><%= job_info.division %></td>
+        <td><%= job_info.employee_type %></td>
+        <td><%= job_info.title %></td>
+        <td><%= job_info.task %></td>
+        <td><%= job_info.job_description %></td>
+        <td>
+          <%= moment(job_info.employment_start_date).format('DD-MM-YYYY') %>
+        </td>
+        <td><%= moment(job_info.termination_date).format('DD-MM-YYYY') %></td>
+        <td><%= job_info.group_name %></td>
+        <td>
+          <a href="/edit/<%= job_info.id %>" class="btn btn-warning btn-sm"
+            >Düzenle</a
+          >
+          <a
+            href="/delete/<%= job_info.id %>"
+            class="btn btn-danger btn-sm"
+            onclick="return confirm('Silmek istediğinize emin misiniz?')"
+            >Sil</a
+          >
+        </td>
+      </tr>
+      <% }); %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Çalıştığı Bölüm</th>
+        <th>Çalıştığı Birim</th>
+        <th>Çalışan Türü</th>
+        <th>Unvanı</th>
+        <th>Görev</th>
+        <th>Yaptığı İş</th>
+        <th>İşe Giriş Tarihi</th>
+        <th>Çıkış Tarihi</th>
+        <th>Grup</th>
+        <th>İşlemler</th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+  <script>
+    $(document).ready(function () {
+      var table = $("#job-info").DataTable({
+        paging: true,
+        lengthChange: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        autoWidth: true,
+        scrollX: true,
+        fixedColumns: {
+          leftColumns: 1,
+        },
+        language: {
+          lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+          zeroRecords: "Kayıt bulunamadı",
+          info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+          infoEmpty: "Kayıt yok",
+          infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+          search: "Ara:",
+          paginate: {
+            first: "İlk",
+            last: "Son",
+            next: "Sonraki",
+            previous: "Önceki",
+          },
+        },
+
+
+        initComplete: function () {
+          this.api()
+            .columns()
+            .every(function () {
+              let column = this;
+              let title = column.footer().textContent;
+
+              // Create input element
+              let input = document.createElement("input");
+              input.placeholder = title;
+              column.footer().replaceChildren(input);
+
+              // Event listener for user input
+              input.addEventListener("keyup", () => {
+                if (column.search() !== input.value) {
+                  column.search(input.value).draw();
+                }
+              });
+            });
+        },
+      });
+    });
+    $(document).ready(function () {
+      $("#column-select").select2({
+        placeholder: "Seçin",
+        allowClear: true, // Seçimi temizlemek için
+        closeOnSelect: false, // Seçim yapıldığında kutunun kapanmaması için
+      });
+    });
+    $("#column-select").on("change", function () {
+      var selectedColumns = $(this).val();
+
+      // Hide all columns
+      for (var i = 0; i < table.columns().count(); i++) {
+        table.column(i).visible(false);
+      }
+
+      // Show selected columns
+      if (selectedColumns) {
+        $.each(selectedColumns, function (index, value) {
+          table.column(value).visible(true);
+        });
+      }
+    });
+  </script>
+

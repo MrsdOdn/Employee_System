@@ -1,28 +1,44 @@
-<nav>
+<h3 class="employee-h3">Personel Bilgi Sistemi</h3>
+<nav class="mb-2">
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
     <button
       class="nav-link active"
-      id="nav-home-tab"
+      id="nav-user-tab"
       data-bs-toggle="tab"
-      data-bs-target="#nav-home"
+      data-bs-target="#nav-user"
       type="button"
       role="tab"
-      aria-controls="nav-home"
+      aria-controls="nav-user"
       aria-selected="true"
     >
-      Home
+      Kullanıcı Bilgileri
+      <ion-icon class="tab-icon" name="person"></ion-icon>
     </button>
     <button
       class="nav-link"
-      id="nav-profile-tab"
+      id="nav-job-tab"
       data-bs-toggle="tab"
-      data-bs-target="#nav-profile"
+      data-bs-target="#nav-job"
       type="button"
       role="tab"
-      aria-controls="nav-profile"
+      aria-controls="nav-job"
       aria-selected="false"
     >
-      Profile
+      İş Bilgileri
+      <ion-icon class="tab-icon" name="bag-remove"></ion-icon>
+    </button>
+    <button
+      class="nav-link"
+      id="nav-personal-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-personal"
+      type="button"
+      role="tab"
+      aria-controls="nav-personal"
+      aria-selected="false"
+    >
+      Kişisel Bilgiler
+      <ion-icon class="tab-icon" name="id-card"></ion-icon>
     </button>
     <button
       class="nav-link"
@@ -34,177 +50,107 @@
       aria-controls="nav-contact"
       aria-selected="false"
     >
-      Contact
+      İletişim Bilgileri
+      <ion-icon class="tab-icon" name="call"></ion-icon>
     </button>
     <button
       class="nav-link"
-      id="nav-disabled-tab"
+      id="nav-education-tab"
       data-bs-toggle="tab"
-      data-bs-target="#nav-disabled"
+      data-bs-target="#nav-education"
       type="button"
       role="tab"
-      aria-controls="nav-disabled"
+      aria-controls="nav-education"
       aria-selected="false"
-      disabled
     >
-      Disabled
+      Eğitim Bilgiler
+      <ion-icon class="tab-icon" name="school"></ion-icon>
+    </button>
+    <button
+      class="nav-link"
+      id="nav-body-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-body"
+      type="button"
+      role="tab"
+      aria-controls="nav-body"
+      aria-selected="false"
+    >
+      Beden Ölçüleri
+      <ion-icon class="tab-icon" name="body"></ion-icon>
     </button>
   </div>
 </nav>
 
-<div class="tab-content" id="nav-tabContent">
-  <div
-    class="tab-pane fade show active"
-    id="nav-home"
-    role="tabpanel"
-    aria-labelledby="nav-home-tab"
-    tabindex="0"
-  >
-    home
-  </div>
-  <div
-    class="tab-pane fade"
-    id="nav-profile"
-    role="tabpanel"
-    aria-labelledby="nav-profile-tab"
-    tabindex="0"
-  >
-    profile
-  </div>
-  <div
-    class="tab-pane fade"
-    id="nav-contact"
-    role="tabpanel"
-    aria-labelledby="nav-contact-tab"
-    tabindex="0"
-  >
-    contact
-  </div>
-  <div
-    class="tab-pane fade"
-    id="nav-disabled"
-    role="tabpanel"
-    aria-labelledby="nav-disabled-tab"
-    tabindex="0"
-  >
-    disabled
-  </div>
-</div>
-
-<h1 class="text-center mb-4">Çalışanlar Tablosu</h1>
-
-<!-- Alan seçimi için Select2 -->
-<div class="mb-3">
-  <label>Göstermek istediğiniz alanları seçin:</label>
-  <select id="column-select" class="form-control" multiple="multiple">
-    <option value="0">Ad-Soyad</option>
-    <option value="1">Email</option>
-    <option value="2">Telefon</option>
-    <option value="3">İşlem</option>
-  </select>
-</div>
-
-<!-- Tablo yapısı -->
-<table
-  id="employees"
-  class="display table table-striped nowrap"
-  style="width: 100%"
+<div
+  class="tab-pane fade show active"
+  id="nav-user"
+  role="tabpanel"
+  aria-labelledby="nav-user-tab"
+  tabindex="0"
 >
-  <thead>
-    <tr>
-      <th>Ad-Soyad</th>
-      <th>Email</th>
-      <th>Telefon</th>
-      <th>İşlem</th>
-    </tr>
-    <tr>
-      <th><input type="text" placeholder="Ara..." /></th>
-      <th><input type="text" placeholder="Ara..." /></th>
-      <th><input type="text" placeholder="Ara..." /></th>
-      <th><input type="text" placeholder="Ara..." /></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% employees.forEach(employee => { %>
-    <tr>
-      <td><%= employee.first_name %> <%= employee.last_name %></td>
-      <td><%= employee.email %></td>
-      <td><%= employee.phone_number %></td>
-      <td>
-        <a href="/edit/<%= employee.id %>" class="btn btn-warning btn-sm"
-          >Düzenle</a
-        >
-        <a
-          href="/delete/<%= employee.id %>"
-          class="btn btn-danger btn-sm"
-          onclick="return confirm('Silmek istediğinize emin misiniz?')"
-          >Sil</a
-        >
-      </td>
-    </tr>
-    <% }); %>
-  </tbody>
-</table>
+  <%- include("./calisanlar_partials/user_info.ejs") %>
+</div>
+<div
+  class="tab-pane fade"
+  id="nav-job"
+  role="tabpanel"
+  aria-labelledby="nav-job-tab"
+  tabindex="0"
+>
+  <%- include("./calisanlar_partials/job_info.ejs") %>
+</div>
+<div
+  class="tab-pane fade"
+  id="nav-personal"
+  role="tabpanel"
+  aria-labelledby="nav-personal-tab"
+  tabindex="0"
+>
+  <%- include("./calisanlar_partials/personal_info.ejs") %>
+</div>
+<div
+  class="tab-pane fade"
+  id="nav-contact"
+  role="tabpanel"
+  aria-labelledby="nav-contact-tab"
+  tabindex="0"
+></div>
+
+<div
+  class="tab-pane fade"
+  id="nav-education"
+  role="tabpanel"
+  aria-labelledby="nav-education-tab"
+  tabindex="0"
+></div>
+<div
+  class="tab-pane fade"
+  id="nav-body"
+  role="tabpanel"
+  aria-labelledby="nav-body-tab"
+  tabindex="0"
+></div>
 
 <script>
   $(document).ready(function () {
-    // DataTable oluşturulması
-    var table = $("#employees").DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: true,
-      scrollX: true,
-      fixedColumns: {
-        leftColumns: 1, // Soldan ilk sütunu sabitler
-      },
-      language: {
-        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
-        zeroRecords: "Kayıt bulunamadı",
-        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
-        infoEmpty: "Kayıt yok",
-        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
-        search: "Ara:",
-        paginate: {
-          first: "İlk",
-          last: "Son",
-          next: "Sonraki",
-          previous: "Önceki",
-        },
-      },
-    });
+    const $tabButtons = $(".nav-link");
+    const $tabIcons = $(".tab-icon");
 
-    // Her sütundaki arama kutuları için olay dinleyicileri
-    $("#employees thead tr:eq(1) th input").each(function (i) {
-      $(this).on("keyup change clear", function () {
-        if (table.column(i).search() !== this.value) {
-          table.column(i).search(this.value).draw();
-        }
-      });
-    });
+    $tabButtons.on("click", function () {
+      $tabButtons.removeClass("active");
+      $tabIcons.removeClass("tab-icon-active");
 
-    // Select2 başlatma
-    $("#column-select").select2({
-      placeholder: "Göstermek istediğiniz alanları seçin",
-    });
+      $(this).addClass("active");
+      $(this).find(".tab-icon").addClass("tab-icon-active");
 
-    // Seçim değiştiğinde sütun görünürlüğünü güncelleme
-    $("#column-select").on("change", function () {
-      var selectedColumns = $(this).val(); // Seçilen sütunları al
+      // Tüm tab pane'leri gizle
+      $(".tab-pane").removeClass("show").hide();
 
-      // Tüm sütunları gizle
-      for (var i = 0; i < 4; i++) {
-        table.column(i).visible(false);
-      }
-
-      // Seçilen sütunları görünür yap
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          table.column(value).visible(true);
-        });
-      }
+      // Hedef tab pane'yi göster
+      const target = $(this).data("bs-target");
+      $(target).addClass("show").fadeIn(); // FadeIn ile geçiş daha yumuşak olur
+      console.log(target);
     });
   });
 </script>
