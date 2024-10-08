@@ -67,6 +67,7 @@ router.post("/register", async (req, res) => {
     try {
         const checkResult = await db.query("SELECT * FROM employees WHERE email = $1", [email]);
         if (checkResult.rows.length > 0) {
+            req.flash("error", "Bu email ile daha önce kayıt yapılmış.");
             return res.redirect("/login");
         }
 
@@ -79,9 +80,10 @@ router.post("/register", async (req, res) => {
         req.login(result.rows[0], (err) => {
             if (err) {
                 console.error(err);
+                req.flash("error", "Kayıt işlemi sırasında hata oluştu.");
                 return res.redirect("/register");
             }
-            return res.redirect("/home");
+            return res.redirect("user/home");
         });
     } catch (err) {
         console.error(err);
@@ -92,8 +94,9 @@ router.post("/register", async (req, res) => {
 
 // Giriş rotası
 router.post("/login", passport.authenticate("local", {
-    successRedirect: "/home", //ilerleyen zamanda değişecek.
-    failureRedirect: "/login"
+    successRedirect: "user/home", //ilerleyen zamanda değişecek.
+    failureRedirect: "/login",
+    failureFlash: true
 }));
 
 export default router;

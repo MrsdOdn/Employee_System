@@ -1,7 +1,12 @@
 <div class="tab-content" id="nav-tabContent">
   <div class="mb-3 inline-block-container">
     <label>Gösterilecek bilgiler:</label>
-    <select id="column-select" class="form-control" multiple="multiple">
+    <select
+      id="personal-column-select"
+      class="form-control"
+      multiple="multiple"
+    >
+      <option value="12">Çalışan ID</option>
       <option value="0">Ad-Soyad</option>
       <option value="1">Cinsiyet</option>
       <option value="2">Doğum Tarihi</option>
@@ -25,6 +30,7 @@
 >
   <thead>
     <tr>
+      <th>Çalışan ID</th>
       <th>Ad-Soyad</th>
       <th>Cinsiyet</th>
       <th>Doğum Tarihi</th>
@@ -42,9 +48,10 @@
   <tbody>
     <% personal_info.forEach(info => { %>
     <tr>
+      <td><%= info.employee_id %></td>
       <td><%= info.first_name %> <%= info.last_name %></td>
       <td><%= info.gender %></td>
-      <td><%= info.birth_date %></td>
+      <td><%= moment(info.birth_date).format('DD-MM-YYYY') %></td>
       <td><%= info.birth_place %></td>
       <td><%= info.nationality %></td>
       <td><%= info.blood_type %></td>
@@ -69,6 +76,7 @@
   </tbody>
   <tfoot>
     <tr>
+      <th>Çalışan ID</th>
       <th>Ad-Soyad</th>
       <th>Cinsiyet</th>
       <th>Doğum Tarihi</th>
@@ -112,6 +120,21 @@
           previous: "Önceki",
         },
       },
+      columnDefs: [
+        {
+          targets: "_all",
+          render: function (data, type, row, meta) {
+            if (meta.col === 12) {
+              return data;
+            }
+            if (type === "display" && data.length > 30) {
+              return data.substr(0, 30) + "...";
+            }
+
+            return data;
+          },
+        },
+      ],
       initComplete: function () {
         this.api()
           .columns()
@@ -119,12 +142,10 @@
             let column = this;
             let title = column.footer().textContent;
 
-            // Create input element
             let input = document.createElement("input");
             input.placeholder = title;
             column.footer().replaceChildren(input);
 
-            // Event listener for user input
             input.addEventListener("keyup", () => {
               if (column.search() !== this.value) {
                 column.search(input.value).draw();
@@ -137,18 +158,16 @@
       },
     });
 
-    $("#column-select").select2({
+    $("#personal-column-select").select2({
       placeholder: "Seçin",
     });
-    $("#column-select").on("change", function () {
+    $("#personal-column-select").on("change", function () {
       var selectedColumns = $(this).val();
 
-      // Tüm sütunları gizle
       for (var i = 0; i < table.columns().count(); i++) {
         table.column(i).visible(false);
       }
 
-      // Seçilen sütunları görünür yap
       if (selectedColumns) {
         $.each(selectedColumns, function (index, value) {
           table.column(value).visible(true);

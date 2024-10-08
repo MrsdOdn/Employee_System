@@ -36,8 +36,52 @@ const job_info_sql = `SELECT
             Employee_Groups eg ON e.employee_id = eg.employee_id
         LEFT JOIN 
             Groups g ON eg.group_id = g.id`;
-const personal_info_sql = `SELECT * FROM Employee_Personal_Information`;
+const personal_info_sql = `SELECT 
+    epi.*, 
+    e.first_name, 
+    e.last_name
+FROM 
+    Employee_Personal_Information epi
+LEFT JOIN 
+    employees e 
+ON 
+    epi.employee_id = e.employee_id;
+`;
+const contact_info_sql = `SELECT
+    ec.*,
+    e.first_name, 
+    e.last_name
+FROM
+    Employee_Contacts ec
+LEFT JOIN 
+    employees e
+ON
+    ec.employee_id = e.employee_id`;
+const education_info_sql = `SELECT
+    ee.*,
+    e.first_name, 
+    e.last_name
+FROM
+    Employee_Educations ee
+LEFT JOIN 
+    employees e
+ON
+    ee.employee_id = e.employee_id`;
 
+const body_info_sql = `SELECT
+    ebm.*,
+    e.first_name, 
+    e.last_name
+FROM
+    Employee_Body_Measurements ebm
+LEFT JOIN 
+    employees e
+ON
+    ebm.employee_id = e.employee_id`;
+
+router.get("/", (req, res) => {
+    res.render("admin/admin.ejs");
+});
 // Duyurular route
 router.get("/duyurular", (req, res) => {
     res.render("admin/aduyurular.ejs");
@@ -49,48 +93,20 @@ router.get('/calisanlar', async (req, res) => {
         const user_info_result = await db.query(user_info_sql);
         const job_info_result = await db.query(job_info_sql);
         const personal_info_result = await db.query(personal_info_sql);
-        res.render('admin/calisanlar.ejs', { employees: user_info_result.rows, job_info: job_info_result.rows, personal_info: personal_info_result.rows, });
+        const contact_info_result = await db.query(contact_info_sql);
+        const education_info_result = await db.query(education_info_sql);
+        const body_info_result = await db.query(body_info_sql);
+
+        res.render('admin/calisanlar.ejs', {
+            employees: user_info_result.rows, job_info: job_info_result.rows,
+            personal_info: personal_info_result.rows, contact_info: contact_info_result.rows,
+            education_info: education_info_result.rows, body_info: body_info_result.rows,
+        });
 
     } catch (err) {
         console.error(err);
         res.status(500).send('Bir hata oluştu.');
     }
 });
-
-/* // Job info route
-const getJobInfo = async (req, res) => {
-    try {
-        const result = await db.query(job_info_sql);
-        if (result.rows.length === 0) {
-            return res.status(404).send('No job information found.');
-        }
-        res.render('admin/calisanlar_partials/job_info.ejs', { job_info: result.rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Bir hata oluştu.');
-    }
-};
-
-router.get('/calisanlar/job-info', getJobInfo);
-
-// Personal info route
-router.get('/calisanlar/personal-info', async (req, res) => {
-    // Implement personal info query logic
-});
-
-// Contact info route
-router.get('/calisanlar/contact-info', async (req, res) => {
-    // Implement contact info query logic
-});
-
-// Education info route
-router.get('/calisanlar/education-info', async (req, res) => {
-    // Implement education info query logic
-});
-
-// Body info route
-router.get('/calisanlar/body-info', async (req, res) => {
-    // Implement body info query logic
-}); */
 
 export default router;

@@ -1,7 +1,7 @@
 <div class="tab-content" id="nav-tabContent">
   <div class="mb-3 inline-block-container select2-container">
     <label>Gösterilecek bilgiler:</label>
-    <select id="column-select" class="form-control" multiple="multiple">
+    <select id="job-column-select" class="form-control" multiple="multiple">
       <option value="0">Çalışan ID</option>
       <option value="1">Ad-Soyad</option>
       <option value="2">Çalıştığı Bölüm</option>
@@ -84,78 +84,86 @@
     </tfoot>
   </table>
 </div>
-  <script>
-    $(document).ready(function () {
-      var table = $("#job-info").DataTable({
-        paging: true,
-        lengthChange: true,
-        searching: true,
-        ordering: true,
-        info: true,
-        autoWidth: true,
-        scrollX: true,
-        fixedColumns: {
-          leftColumns: 1,
+<script>
+  $(document).ready(function () {
+    var table = $("#job-info").DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: true,
+      scrollX: true,
+      fixedColumns: {
+        leftColumns: 1,
+      },
+      language: {
+        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        zeroRecords: "Kayıt bulunamadı",
+        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+        infoEmpty: "Kayıt yok",
+        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        search: "Ara:",
+        paginate: {
+          first: "İlk",
+          last: "Son",
+          next: "Sonraki",
+          previous: "Önceki",
         },
-        language: {
-          lengthMenu: "Sayfa başına _MENU_ kayıt göster",
-          zeroRecords: "Kayıt bulunamadı",
-          info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
-          infoEmpty: "Kayıt yok",
-          infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
-          search: "Ara:",
-          paginate: {
-            first: "İlk",
-            last: "Son",
-            next: "Sonraki",
-            previous: "Önceki",
+      },
+      columnDefs: [
+        {
+          targets: "_all",
+          render: function (data, type, row, meta) {
+            if (meta.col === 11) {
+              return data;
+            }
+            if (type === "display" && data.length > 30) {
+              return data.substr(0, 30) + "...";
+            }
+
+            return data;
           },
         },
+      ],
+      initComplete: function () {
+        this.api()
+          .columns()
+          .every(function () {
+            let column = this;
+            let title = column.footer().textContent;
 
+            let input = document.createElement("input");
+            input.placeholder = title;
+            column.footer().replaceChildren(input);
 
-        initComplete: function () {
-          this.api()
-            .columns()
-            .every(function () {
-              let column = this;
-              let title = column.footer().textContent;
-
-              // Create input element
-              let input = document.createElement("input");
-              input.placeholder = title;
-              column.footer().replaceChildren(input);
-
-              // Event listener for user input
-              input.addEventListener("keyup", () => {
-                if (column.search() !== input.value) {
-                  column.search(input.value).draw();
-                }
-              });
+            input.addEventListener("keyup", () => {
+              if (column.search() !== input.value) {
+                column.search(input.value).draw();
+              }
             });
-        },
+          });
+      },
+    });
+  });
+  $(document).ready(function () {
+    $("#job-column-select").select2({
+      placeholder: "Seçin",
+      allowClear: true,
+      closeOnSelect: false,
+    });
+  });
+  $("#job-column-select").on("change", function () {
+    var selectedColumns = $(this).val();
+
+    for (var i = 0; i < table.columns().count(); i++) {
+      table.column(i).visible(false);
+    }
+
+    if (selectedColumns) {
+      $.each(selectedColumns, function (index, value) {
+        table.column(value).visible(true);
       });
-    });
-    $(document).ready(function () {
-      $("#column-select").select2({
-        placeholder: "Seçin",
-        allowClear: true, // Seçimi temizlemek için
-        closeOnSelect: false, // Seçim yapıldığında kutunun kapanmaması için
-      });
-    });
-    $("#column-select").on("change", function () {
-      var selectedColumns = $(this).val();
-
-      // Hide all columns
-      for (var i = 0; i < table.columns().count(); i++) {
-        table.column(i).visible(false);
-      }
-
-      // Show selected columns
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          table.column(value).visible(true);
-        });
-      }
-    });
-  </script>
-
+    }
+  });
+</script>

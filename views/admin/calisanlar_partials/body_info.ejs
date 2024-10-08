@@ -1,0 +1,154 @@
+<div class="mb-3 inline-block-container">
+  <label>Gösterilecek bilgiler:</label>
+  <select id="body-column-select" class="form-control" multiple="multiple">
+    <option value="0">Ad-Soyad</option>
+    <option value="1">Ayakkabı Numarası</option>
+    <option value="2">Üst Kıyafet Size</option>
+    <option value="3">Pantolon Size</option>
+    <option value="4">Ceket Size</option>
+    <option value="5">Eldiven Size</option>
+    <option value="6">Baret Size</option>
+  </select>
+</div>
+
+<table
+  id="body_info"
+  class="display table table-striped nowrap"
+  style="width: 100%"
+>
+  <thead>
+    <tr>
+      <th>Ad-Soyad</th>
+      <th>Ayakkabı Numarası</th>
+      <th>Üst Kıyafet Size</th>
+      <th>Pantolon Size</th>
+      <th>Ceket Size</th>
+      <th>Eldiven Size</th>
+      <th>Baret Size</th>
+      <th>İşlem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% body_info.forEach(body_info => { %>
+    <tr>
+      <td><%= body_info.first_name %> <%= body_info.last_name %></td>
+      <td><%= body_info.shoe_size %></td>
+      <td><%= body_info.clothing_size %></td>
+      <td><%= body_info.pant_size %></td>
+      <td><%= body_info.coat_size %></td>
+      <td><%= body_info.glove_size %></td>
+      <td><%= body_info.helmet_size %></td>
+      <td>
+        <a href="/edit/<%= body_info.id %>" class="btn btn-warning btn-sm"
+          >Düzenle</a
+        >
+        <a
+          href="/delete/<%= body_info.id %>"
+          class="btn btn-danger btn-sm"
+          onclick="return confirm('Silmek istediğinize emin misiniz?')"
+          >Sil</a
+        >
+      </td>
+    </tr>
+    <% }); %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Ad-Soyad</th>
+      <th>Ayakkabı Numarası</th>
+      <th>Üst Kıyafet Size</th>
+      <th>Pantolon Size</th>
+      <th>Ceket Size</th>
+      <th>Eldiven Size</th>
+      <th>Baret Size</th>
+      <th>İşlem</th>
+    </tr>
+  </tfoot>
+</table>
+
+<script>
+  $(document).ready(function () {
+    var bodyTable = $("#body_info").DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: true,
+      scrollX: true,
+      fixedColumns: {
+        leftColumns: 1,
+      },
+      language: {
+        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        zeroRecords: "Kayıt bulunamadı",
+        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+        infoEmpty: "Kayıt yok",
+        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        search: "Ara:",
+        paginate: {
+          first: "İlk",
+          last: "Son",
+          next: "Sonraki",
+          previous: "Önceki",
+        },
+      },
+      columnDefs: [
+        {
+          targets: "_all",
+          render: function (data, type, row, meta) {
+            if (meta.col === 7) {
+              return data;
+            }
+            if (type === "display" && data.length > 30) {
+              return data.substr(0, 30) + "...";
+            }
+
+            return data;
+          },
+        },
+      ],
+      initComplete: function () {
+        this.api()
+          .columns()
+          .every(function () {
+            let column = this;
+            let title = column.footer().textContent;
+
+            let input = document.createElement("input");
+            input.placeholder = title;
+            column.footer().replaceChildren(input);
+
+            input.addEventListener("keyup", () => {
+              if (column.search() !== this.value) {
+                column.search(input.value).draw();
+              }
+            });
+          });
+      },
+      fixedHeader: {
+        footer: true,
+      },
+    });
+
+    // Select2 ile sütun seçici
+    $("#body-column-select").select2({
+      placeholder: "Seçin",
+    });
+    $("#body-column-select").on("change", function () {
+      var selectedColumns = $(this).val();
+
+      // Tüm sütunları gizle
+      for (var i = 0; i < bodyTable.columns().count(); i++) {
+        bodyTable.column(i).visible(false);
+      }
+
+      // Seçilen sütunları görünür yap
+      if (selectedColumns) {
+        $.each(selectedColumns, function (index, value) {
+          bodyTable.column(value).visible(true);
+        });
+      }
+    });
+  });
+</script>

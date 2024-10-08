@@ -102,6 +102,28 @@ tfoot input {
     width: 100%;
 }
 
+.announcement-card {
+    background-color: #e8e8e8;
+    border-radius: "20px";
+    box-shadow: "0 0 10px 10px";
+}
+
+.btn-annoucement {
+    background-color: var(--light-green);
+    color: var(--white);
+    font-size: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+.btn-annoucement > ion-icon {
+    color: var(--white);
+    font-size: 2rem;
+    margin-left: 5px;
+}
+
+
 /* 600px ve altı için (mobil cihazlar) */
 @media only screen and (max-width: 600px) {
     body {
@@ -114,7 +136,15 @@ tfoot input {
 
     .navbar {
         display: none;
-        /* Mobilde navbar'ı gizle */
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 10px;
     }
 }
 
@@ -123,6 +153,8 @@ tfoot input {
     .log-reg-container {
         max-width: 35%;
     }
+
+
 }
 
 @media only screen and (min-width: 1200px) {

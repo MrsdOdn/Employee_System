@@ -1,0 +1,150 @@
+<div class="tab-content" id="nav-tabContent">
+  <div class="mb-3 inline-block-container">
+    <label>Gösterilecek bilgiler:</label>
+    <select id="contact-column-select" class="form-control" multiple="multiple">
+      <option value="1">Çalışan ID</option>
+      <option value="0">Ad-Soyad</option>
+      <option value="2">Adres Tipi</option>
+      <option value="3">Şehir</option>
+      <option value="4">Semt</option>
+      <option value="5">Tam Adres</option>
+      <option value="6">Acil Durum Numarası</option>
+    </select>
+  </div>
+</div>
+
+<table
+  id="contact_info"
+  class="display table table-striped nowrap"
+  style="width: 100%"
+>
+  <thead>
+    <tr>
+      <th>Çalışan ID</th>
+      <th>Ad-Soyad</th>
+      <th>Adres Tipi</th>
+      <th>Şehir</th>
+      <th>Semt</th>
+      <th>Tam Adres</th>
+      <th>Acil Durum Numarası</th>
+      <th>İşlem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% contact_info.forEach(contact_info => { %>
+    <tr>
+      <td><%= contact_info.employee_id %></td>
+      <td><%= contact_info.first_name %> <%= contact_info.last_name %></td>
+      <td><%= contact_info.address_type %></td>
+      <td><%= contact_info.city %></td>
+      <td><%= contact_info.state %></td>
+      <td><%= contact_info.full_address %></td>
+      <td><%= contact_info.emergency_contact %></td>
+      <td>
+        <a href="/edit/<%= contact_info.id %>" class="btn btn-warning btn-sm"
+          >Düzenle</a
+        >
+        <a
+          href="/delete/<%= contact_info.id %>"
+          class="btn btn-danger btn-sm"
+          onclick="return confirm('Silmek istediğinize emin misiniz?')"
+          >Sil</a
+        >
+      </td>
+    </tr>
+    <% }); %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Çalışan ID</th>
+      <th>Ad-Soyad</th>
+      <th>Adres Tipi</th>
+      <th>Şehir</th>
+      <th>Semt</th>
+      <th>Tam Adres</th>
+      <th>Acil Durum Numarası</th>
+      <th>İşlem</th>
+    </tr>
+  </tfoot>
+</table>
+
+<script>
+  $(document).ready(function () {
+    var table = $("#contact_info").DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: true,
+      scrollX: true,
+      fixedColumns: {
+        leftColumns: 1,
+      },
+      language: {
+        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        zeroRecords: "Kayıt bulunamadı",
+        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+        infoEmpty: "Kayıt yok",
+        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        search: "Ara:",
+        paginate: {
+          first: "İlk",
+          last: "Son",
+          next: "Sonraki",
+          previous: "Önceki",
+        },
+      },
+      columnDefs: [
+        {
+          targets: "_all",
+          render: function (data, type, row, meta) {
+            if (meta.col === 7) {
+              return data;
+            }
+            if (type === "display" && data.length > 30) {
+              return data.substr(0, 30) + "...";
+            }
+
+            return data;
+          },
+        },
+      ],
+      initComplete: function () {
+        this.api()
+          .columns()
+          .every(function () {
+            let column = this;
+            let title = column.footer().textContent;
+
+            let input = document.createElement("input");
+            input.placeholder = title;
+            column.footer().replaceChildren(input);
+
+            input.addEventListener("keyup", () => {
+              if (column.search() !== this.value) {
+                column.search(input.value).draw();
+              }
+            });
+          });
+      },
+    });
+
+    $("#contact-column-select").select2({
+      placeholder: "Seçin",
+    });
+    $("#contact-column-select").on("change", function () {
+      var selectedColumns = $(this).val();
+
+      for (var i = 0; i < table.columns().count(); i++) {
+        table.column(i).visible(false);
+      }
+
+      if (selectedColumns) {
+        $.each(selectedColumns, function (index, value) {
+          table.column(value).visible(true);
+        });
+      }
+    });
+  });
+</script>

@@ -1,2 +1,33 @@
-<h1>Duyurular</h1>
-<p>Burada duyurular yer alacak...</p>
+<div class="container mt-1">
+  <h1>Duyurular</h1>
+  <div class="row">
+    <% announcement.forEach(announcement => { %>
+    <div class="col-md-4 mb-4">
+      <div class="card announcement-card">
+        <div class="card-body">
+          <h5 class="card-title"><%= announcement.title %></h5>
+          <p class="card-text"><%= announcement.content %></p>
+          <!-- <p class="card-text">
+            <small class="text-muted"
+              >Yayınlayan:  announcement.published_by </small
+            >
+          </p> -->
+          <p class="card-text">
+            <small class="text-muted"
+              >Yayın Tarihi: <%=
+              moment(announcement.publish_date).format('DD/MM/YYYY HH:mm')
+              %></small
+            >
+          </p>
+          <p class="card-text">
+            <small class="text-muted"
+              >Kategorisi: <%= announcement.category_name %></small
+            >
+          </p>
+          <a href="#" class="btn">Detaylar</a>
+        </div>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+</div>

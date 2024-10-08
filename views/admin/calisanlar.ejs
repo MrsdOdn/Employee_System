@@ -115,7 +115,9 @@
   role="tabpanel"
   aria-labelledby="nav-contact-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./calisanlar_partials/contact_info.ejs") %>
+</div>
 
 <div
   class="tab-pane fade"
@@ -123,14 +125,18 @@
   role="tabpanel"
   aria-labelledby="nav-education-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./calisanlar_partials/education_info.ejs") %>
+</div>
 <div
   class="tab-pane fade"
   id="nav-body"
   role="tabpanel"
   aria-labelledby="nav-body-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./calisanlar_partials/body_info.ejs") %>
+</div>
 
 <script>
   $(document).ready(function () {
@@ -144,13 +150,10 @@
       $(this).addClass("active");
       $(this).find(".tab-icon").addClass("tab-icon-active");
 
-      // Tüm tab pane'leri gizle
-      $(".tab-pane").removeClass("show").hide();
+      $(".tab-pane").removeClass("show active").hide();
 
-      // Hedef tab pane'yi göster
       const target = $(this).data("bs-target");
-      $(target).addClass("show").fadeIn(); // FadeIn ile geçiş daha yumuşak olur
-      console.log(target);
+      $(target).addClass("show active").fadeIn();
     });
   });
 </script>
