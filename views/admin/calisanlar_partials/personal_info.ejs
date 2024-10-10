@@ -1,111 +1,143 @@
-<div class="tab-content" id="nav-tabContent">
-  <div class="mb-3 inline-block-container">
-    <label>Gösterilecek bilgiler:</label>
-    <select
-      id="personal-column-select"
-      class="form-control"
-      multiple="multiple"
-    >
-      <option value="12">Çalışan ID</option>
-      <option value="0">Ad-Soyad</option>
-      <option value="1">Cinsiyet</option>
-      <option value="2">Doğum Tarihi</option>
-      <option value="3">Doğum Yeri</option>
-      <option value="4">Uyruğu</option>
-      <option value="5">Kan Grubu</option>
-      <option value="6">Anne Adı</option>
-      <option value="7">Baba Adı</option>
-      <option value="8">Askerlik Durumu</option>
-      <option value="9">Eğitim Durumu</option>
-      <option value="10">Sicil No</option>
-      <option value="11">İşlem</option>
-    </select>
-  </div>
+<div class="container mb-3">
+  <table id="personal_info" class="display" style="width: 100%">
+    <thead>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Cinsiyet</th>
+        <th>Doğum Tarihi</th>
+        <th>Doğum Yeri</th>
+        <th>Uyruğu</th>
+        <th>Kan Grubu</th>
+        <th>Anne Adı</th>
+        <th>Baba Adı</th>
+        <th>Askerlik Durumu</th>
+        <th>Eğitim Durumu</th>
+        <th>Sicil No</th>
+        <th>İşlem</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Cinsiyet</th>
+        <th>Doğum Tarihi</th>
+        <th>Doğum Yeri</th>
+        <th>Uyruğu</th>
+        <th>Kan Grubu</th>
+        <th>Anne Adı</th>
+        <th>Baba Adı</th>
+        <th>Askerlik Durumu</th>
+        <th>Eğitim Durumu</th>
+        <th>Sicil No</th>
+        <th>İşlem</th>
+      </tr>
+    </tfoot>
+  </table>
 </div>
-
-<table
-  id="personal_info"
-  class="display table table-striped nowrap"
-  style="width: 100%"
->
-  <thead>
-    <tr>
-      <th>Çalışan ID</th>
-      <th>Ad-Soyad</th>
-      <th>Cinsiyet</th>
-      <th>Doğum Tarihi</th>
-      <th>Doğum Yeri</th>
-      <th>Uyruğu</th>
-      <th>Kan Grubu</th>
-      <th>Anne Adı</th>
-      <th>Baba Adı</th>
-      <th>Askerlik Durumu</th>
-      <th>Eğitim Durumu</th>
-      <th>Sicil No</th>
-      <th>İşlem</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% personal_info.forEach(info => { %>
-    <tr>
-      <td><%= info.employee_id %></td>
-      <td><%= info.first_name %> <%= info.last_name %></td>
-      <td><%= info.gender %></td>
-      <td><%= moment(info.birth_date).format('DD-MM-YYYY') %></td>
-      <td><%= info.birth_place %></td>
-      <td><%= info.nationality %></td>
-      <td><%= info.blood_type %></td>
-      <td><%= info.mother_name %></td>
-      <td><%= info.father_name %></td>
-      <td><%= info.military_status %></td>
-      <td><%= info.education_level %></td>
-      <td><%= info.registration_number %></td>
-      <td>
-        <a href="/edit/<%= info.id %>" class="btn btn-warning btn-sm"
-          >Düzenle</a
-        >
-        <a
-          href="/delete/<%= info.id %>"
-          class="btn btn-danger btn-sm"
-          onclick="return confirm('Silmek istediğinize emin misiniz?')"
-          >Sil</a
-        >
-      </td>
-    </tr>
-    <% }); %>
-  </tbody>
-  <tfoot>
-    <tr>
-      <th>Çalışan ID</th>
-      <th>Ad-Soyad</th>
-      <th>Cinsiyet</th>
-      <th>Doğum Tarihi</th>
-      <th>Doğum Yeri</th>
-      <th>Uyruğu</th>
-      <th>Kan Grubu</th>
-      <th>Anne Adı</th>
-      <th>Baba Adı</th>
-      <th>Askerlik Durumu</th>
-      <th>Eğitim Durumu</th>
-      <th>Sicil No</th>
-      <th>İşlem</th>
-    </tr>
-  </tfoot>
-</table>
 
 <script>
   $(document).ready(function () {
     var table = $("#personal_info").DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: true,
-      scrollX: true,
+      ajax: {
+        url: "/admin/calisanlar/personal/data",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "employee_id" },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return `${row.first_name || "N/A"} ${row.last_name || "N/A"}`;
+          },
+        },
+        {
+          data: "gender",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "birth_date",
+          render: function (data) {
+            return data ? moment(data).format("DD/MM/YYYY") : "N/A";
+          },
+        },
+        {
+          data: "birth_place",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "nationality",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "blood_type",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "mother_name",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "father_name",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "military_status",
+          render: function (data, type, row) {
+            // Cinsiyet kadınsa askeri durum sütununu boş bırak
+            return row.gender === "Kadın" ? "Muaf" : data || "N/A";
+          },
+        },
+        {
+          data: "education_level",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "registration_number",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "employee_id",
+          render: function (data, type, row) {
+            return `<a href="/edit/${data}" class="btn btn-warning btn-sm">
+                <ion-icon name="create-outline"></ion-icon>
+              </a>
+              <a href="/delete/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                <ion-icon name="trash"></ion-icon>
+              </a>`;
+          },
+        },
+      ],
+
       fixedColumns: {
         leftColumns: 1,
       },
+      fixedHeader: true,
+      scrollCollapse: true,
+      scrollY: "100vh",
+      scrollX: true,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
       language: {
         lengthMenu: "Sayfa başına _MENU_ kayıt göster",
         zeroRecords: "Kayıt bulunamadı",
@@ -120,21 +152,6 @@
           previous: "Önceki",
         },
       },
-      columnDefs: [
-        {
-          targets: "_all",
-          render: function (data, type, row, meta) {
-            if (meta.col === 12) {
-              return data;
-            }
-            if (type === "display" && data.length > 30) {
-              return data.substr(0, 30) + "...";
-            }
-
-            return data;
-          },
-        },
-      ],
       initComplete: function () {
         this.api()
           .columns()
@@ -153,26 +170,6 @@
             });
           });
       },
-      fixedHeader: {
-        footer: true,
-      },
-    });
-
-    $("#personal-column-select").select2({
-      placeholder: "Seçin",
-    });
-    $("#personal-column-select").on("change", function () {
-      var selectedColumns = $(this).val();
-
-      for (var i = 0; i < table.columns().count(); i++) {
-        table.column(i).visible(false);
-      }
-
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          table.column(value).visible(true);
-        });
-      }
     });
   });
 </script>

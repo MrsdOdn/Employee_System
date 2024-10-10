@@ -138,7 +138,7 @@
     min-height: calc(100vh - 65px);
     transition: left 0.5s, width 0.5s;
     background: var(--white);
-    padding: 0 10px 0 10px;
+    padding: 0 20px 0 20px;
 }
 
 .content.active {

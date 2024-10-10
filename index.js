@@ -64,7 +64,13 @@ app.use((req, res, next) => {
     next();
 });
 
-
+app.get('/api/user', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json(req.user); 
+    } else {
+        res.status(401).json({ message: 'Not authenticated' });
+    }
+});
 app.get('/', (req, res) => {
     res.render('index', { layout: false });
 });

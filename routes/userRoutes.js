@@ -22,7 +22,7 @@ WHERE
 AND 
     a.publish_date <= CURRENT_TIMESTAMP 
 AND 
-    (expiry_date IS NULL OR expiry_date > CURRENT_TIMESTAMP);;
+    (expiry_date IS NULL OR expiry_date > CURRENT_TIMESTAMP)
 `;
 
 
@@ -45,6 +45,15 @@ router.get("/duyurular", async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).send('Bir hata oluştu.');
+    }
+});
+router.get("/duyurular/data", async (req, res) => {
+    try {
+        const result = await db.query(announcement_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

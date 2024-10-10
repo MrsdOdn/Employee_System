@@ -1,12 +1,47 @@
 <button
   type="button"
-  class="btn btn-annoucement"
+  class="btn btn-annoucement mb-2"
   data-toggle="modal"
   data-target="#announcementModal"
 >
   <ion-icon name="add-circle"></ion-icon>
   Duyuru Ekle
 </button>
+
+<div class="container mb-3">
+    <table id="announcements-table" class="display" style="width: 100%">
+      <thead>
+        <tr>
+          <th>Duyuru ID</th>
+          <th>Kategori</th>
+          <th>Başlık</th>
+          <th>İçerik</th>
+          <th>Yayınlayan</th>
+          <th>Yayınlanacağı Tarih</th>
+          <th>Kaldırılıcağı Tarih</th>
+          <th>Durum</th>
+          <th>Yazıldığı Tarih</th>
+          <th>İşlemler</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <th>Duyuru ID</th>
+          <th>Kategori</th>
+          <th>Başlık</th>
+          <th>İçerik</th>
+          <th>Yayınlayan</th>
+          <th>Yayınlanacağı Tarih</th>
+          <th>Kaldırılıcağı Tarih</th>
+          <th>Durum</th>
+          <th>Yazıldığı Tarih</th>
+          <th>İşlemler</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
 
 <div
   class="modal fade"
@@ -37,6 +72,7 @@
               type="text"
               class="form-control"
               id="announcementTitle"
+              placeholder="Duyuru başlığını girin"
               required
             />
           </div>
@@ -46,15 +82,23 @@
               class="form-control"
               id="announcementContent"
               rows="4"
+              placeholder="Duyuru içeriğini girin"
               required
             ></textarea>
           </div>
           <div class="form-group">
             <label for="announcementCategory">Kategori</label>
+            <select class="form-control" id="announcementCategory" required>
+              <option value="">Kategori Seçin</option>
+              <!-- Kategoriler dinamik olarak yüklenecek -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="publishDate">Yayınlanacağı Tarihi</label>
             <input
-              type="text"
+              type="datetime-local"
               class="form-control"
-              id="announcementCategory"
+              id="publishDate"
               required
             />
           </div>
@@ -82,34 +126,190 @@
 </div>
 
 <script>
+  function ellipsis(text, maxLength) {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  }
   $(document).ready(function () {
-    $("#submitAnnouncement").on("click", function () {
-      const title = $("#announcementTitle").val();
-      const content = $("#announcementContent").val();
-      const category = $("#announcementCategory").val();
-      const expirationDate = $("#expirationDate").val();
+    var table = $("#announcements-table").DataTable({
+      ajax: {
+        url: "/admin/duyurular/data",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "id" },
+        { data: "name" },
+        { data: "title" },
+        {
+          data: "content",
+          render: function (data, type, row) {
+            return `<span class="ellipsis">${ellipsis(data, 200)}</span>`;
+          },
+        },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return `${row.first_name} ${row.last_name}`;
+          },
+        },
+        {
+          data: "publish_date",
+          render: function (data, type, row) {
+            return moment(data).format("DD/MM/YYYY");
+          },
+        },
+        {
+          data: "expiry_date",
+          render: function (data, type, row) {
+            return data ? moment(data).format("DD/MM/YYYY") : "N/A";
+          },
+        },
+        { data: "status" },
+        {
+          data: "created_at",
+          render: function (data) {
+            return moment(data).format("DD/MM/YYYY");
+          },
+        },
+        {
+          data: "id",
+          render: function (data, type, row) {
+            return `<a href="/edit/${data}" class="btn btn-warning btn-sm">
+                    <ion-icon name="create-outline"></ion-icon>
+                    <a href="/delete/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                    <ion-icon name="trash"></ion-icon></a>`;
+          },
+        },
+      ],
+      fixedColumns: {
+        leftColumns: 1,
+      },
+      fixedHeader: true,
+      scrollCollapse: true,
+      scrollY: "100vh",
+      scrollX: true,
+      //sayfalama kısmındaki menü kısmını düzenlmeye yarar.
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
+      language: {
+        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        zeroRecords: "Kayıt bulunamadı",
+        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+        infoEmpty: "Kayıt yok",
+        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        search: "Ara:",
+        paginate: {
+          first: "İlk",
+          last: "Son",
+          next: "Sonraki",
+          previous: "Önceki",
+        },
+      },
 
-      if (title && content && category && expirationDate) {
-        $.ajax({
-          type: "POST",
-          url: "/announcements",
-          data: {
+      initComplete: function () {
+        this.api()
+          .columns()
+          .every(function () {
+            let column = this;
+            let title = column.footer().textContent;
+
+            let input = document.createElement("input");
+            input.placeholder = title;
+            column.footer().replaceChildren(input);
+
+            input.addEventListener("keyup", () => {
+              if (column.search() !== this.value) {
+                column.search(input.value).draw();
+              }
+            });
+          });
+      },
+    });
+
+    //tıklanan satırın bilgilerini alır. bu özelliği kullanarak silme ve benzeri işlemleri yapacağız.
+    table.on("click", "tbody tr", function () {
+      let data = table.row(this).data();
+
+      alert("You clicked on " + data[0] + "'s row");
+    });
+
+    $.ajax({
+      url: '/admin/duyurular/category/data',
+      dataSrc: "",
+      method: 'GET',
+      success: function (data) {
+        const $categorySelect = $("#announcementCategory");
+        data.forEach(category => {
+          const option = `<option value="${category.id}">${category.name}</option>`;
+          $categorySelect.append(option);
+        });
+      },
+      error: function (err) {
+        console.error("Kategoriler yüklenirken hata oluştu", err);
+      }
+    });
+
+    let employeeId;
+    
+    $.ajax({
+    url: '/api/user',
+    method: 'GET',
+    dataType: 'json',
+    success: function(data) {
+        $('#employeeId').text(`Employee ID: ${data.employee_id}`);
+        employeeId = data.employee_id; 
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+        console.error('Hata:', textStatus, errorThrown);
+    }
+    });
+
+    $("#submitAnnouncement").on("click", function () {
+    const title = $("#announcementTitle").val().trim();
+    const content = $("#announcementContent").val().trim();
+    const category = $("#announcementCategory").val();
+    const publishDate = $("#publishDate").val();
+    const expirationDate = $("#expirationDate").val();
+    console.log(employeeId);
+
+    if (title && content && category && expirationDate && employeeId) {
+        const announcementData = {
             title: title,
             content: content,
-            category: category,
-            expiration_date: expirationDate,
-          },
-          success: function (response) {
-            $("#announcementModal").modal("hide");
-            $("#announcementForm")[0].reset();
-          },
-          error: function (err) {
-            alert("Duyuru ekleme sırasında bir hata oluştu.");
-          },
+            published_by: employeeId,
+            publish_date: new Date(publishDate).toISOString(),
+            expiry_date: new Date(expirationDate).toISOString(),
+            status: "active",
+            created_at: new Date().toISOString(),
+            category_id: category
+        };
+        console.log("Gönderilen Duyuru Verisi:", announcementData);
+
+        console.log(announcementData);
+        
+        $.ajax({
+            type: "POST",
+            url: '/admin/duyurular/data',
+            contentType: "application/json",
+            data: JSON.stringify(announcementData),
+            success: function (data) {
+                alert("Duyuru başarıyla eklendi! ID: " + data.id);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error('Hata:', textStatus, errorThrown);
+                alert("Bir hata oluştu: " + errorThrown);
+            }
         });
-      } else {
+
+        $("#announcementModal").modal("hide");
+        $("#announcementForm")[0].reset();
+    } else {
         alert("Lütfen tüm alanları doldurun.");
-      }
+    }
     });
   });
 </script>

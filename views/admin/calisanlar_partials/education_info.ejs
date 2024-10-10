@@ -1,84 +1,114 @@
-<div class="mb-3 inline-block-container">
-  <label>Gösterilecek bilgiler:</label>
-  <select id="education-column-select" class="form-control" multiple="multiple">
-    <option value="0">Ad-Soyad</option>
-    <option value="1">Kurum Türü</option>
-    <option value="2">Kurum Adı</option>
-    <option value="3">Bölüm</option>
-    <option value="4">Başlangıç Yılı</option>
-    <option value="5">Bitiş Yılı</option>
-    <option value="6">Derece</option>
-  </select>
+<div class="container mb-3">
+  <table id="education_info" class="display" style="width: 100%">
+    <thead>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Kurum Türü</th>
+        <th>Kurum Adı</th>
+        <th>Bölüm</th>
+        <th>Başlangıç Yılı</th>
+        <th>Bitiş Yılı</th>
+        <th>Derece</th>
+        <th>İşlem</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Kurum Türü</th>
+        <th>Kurum Adı</th>
+        <th>Bölüm</th>
+        <th>Başlangıç Yılı</th>
+        <th>Bitiş Yılı</th>
+        <th>Derece</th>
+        <th>İşlem</th>
+      </tr>
+    </tfoot>
+  </table>
 </div>
-
-<table
-  id="education_info"
-  class="display table table-striped nowrap"
-  style="width: 100%"
->
-  <thead>
-    <tr>
-      <th>Ad-Soyad</th>
-      <th>Kurum Türü</th>
-      <th>Kurum Adı</th>
-      <th>Bölüm</th>
-      <th>Başlangıç Yılı</th>
-      <th>Bitiş Yılı</th>
-      <th>Derece</th>
-      <th>İşlem</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% education_info.forEach(education_info => { %>
-    <tr>
-      <td><%= education_info.first_name %> <%= education_info.last_name %></td>
-      <td><%= education_info.institution_type %></td>
-      <td><%= education_info.institution_name %></td>
-      <td><%= education_info.department %></td>
-      <td><%= education_info.start_year %></td>
-      <td><%= education_info.end_year %></td>
-      <td><%= education_info.degree %></td>
-      <td>
-        <a href="/edit/<%= education_info.id %>" class="btn btn-warning btn-sm"
-          >Düzenle</a
-        >
-        <a
-          href="/delete/<%= education_info.id %>"
-          class="btn btn-danger btn-sm"
-          onclick="return confirm('Silmek istediğinize emin misiniz?')"
-          >Sil</a
-        >
-      </td>
-    </tr>
-    <% }); %>
-  </tbody>
-  <tfoot>
-    <tr>
-      <th>Ad-Soyad</th>
-      <th>Kurum Türü</th>
-      <th>Kurum Adı</th>
-      <th>Bölüm</th>
-      <th>Başlangıç Yılı</th>
-      <th>Bitiş Yılı</th>
-      <th>Derece</th>
-      <th>İşlem</th>
-    </tr>
-  </tfoot>
-</table>
-
 <script>
+  function ellipsis(text, maxLength) {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  }
   $(document).ready(function () {
-    var educationTable = $("#education_info").DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: true,
-      scrollX: true,
+    var table = $("#education_info").DataTable({
+      ajax: {
+        url: "/admin/calisanlar/education/data",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "employee_id" },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return data ? `${data} ${row.last_name || "N/A"}` : "N/A";
+          },
+        },
+        {
+          data: "institution_type",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "institution_name",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "department",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "start_year",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "end_year",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "degree",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "id",
+          render: function (data) {
+            return `<a href="/edit/institution/${data}" class="btn btn-warning btn-sm">
+                <ion-icon name="create-outline"></ion-icon>
+              </a>
+              <a href="/delete/institution/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                <ion-icon name="trash"></ion-icon>
+              </a>`;
+          },
+        },
+      ],
       fixedColumns: {
         leftColumns: 1,
       },
+      fixedHeader: true,
+      scrollCollapse: true,
+      scrollY: "100vh",
+      scrollX: true,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
       language: {
         lengthMenu: "Sayfa başına _MENU_ kayıt göster",
         zeroRecords: "Kayıt bulunamadı",
@@ -93,21 +123,6 @@
           previous: "Önceki",
         },
       },
-      columnDefs: [
-        {
-          targets: "_all",
-          render: function (data, type, row, meta) {
-            if (meta.col === 7) {
-              return data;
-            }
-            if (type === "display" && data.length > 30) {
-              return data.substr(0, 30) + "...";
-            }
-
-            return data;
-          },
-        },
-      ],
       initComplete: function () {
         this.api()
           .columns()
@@ -126,26 +141,6 @@
             });
           });
       },
-      fixedHeader: {
-        footer: true,
-      },
-    });
-
-    $("#education-column-select").select2({
-      placeholder: "Seçin",
-    });
-    $("#education-column-select").on("change", function () {
-      var selectedColumns = $(this).val();
-
-      for (var i = 0; i < educationTable.columns().count(); i++) {
-        educationTable.column(i).visible(false);
-      }
-
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          educationTable.column(value).visible(true);
-        });
-      }
     });
   });
 </script>

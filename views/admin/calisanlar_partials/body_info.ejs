@@ -1,84 +1,116 @@
-<div class="mb-3 inline-block-container">
-  <label>Gösterilecek bilgiler:</label>
-  <select id="body-column-select" class="form-control" multiple="multiple">
-    <option value="0">Ad-Soyad</option>
-    <option value="1">Ayakkabı Numarası</option>
-    <option value="2">Üst Kıyafet Size</option>
-    <option value="3">Pantolon Size</option>
-    <option value="4">Ceket Size</option>
-    <option value="5">Eldiven Size</option>
-    <option value="6">Baret Size</option>
-  </select>
+<div class="container mb-3">
+  <table id="body_info" class="display" style="width: 100%">
+    <thead>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Ayakkabı Numarası</th>
+        <th>Üst Kıyafet Size</th>
+        <th>Pantolon Size</th>
+        <th>Ceket Size</th>
+        <th>Eldiven Size</th>
+        <th>Baret Size</th>
+        <th>İşlem</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Ayakkabı Numarası</th>
+        <th>Üst Kıyafet Size</th>
+        <th>Pantolon Size</th>
+        <th>Ceket Size</th>
+        <th>Eldiven Size</th>
+        <th>Baret Size</th>
+        <th>İşlem</th>
+      </tr>
+    </tfoot>
+  </table>
 </div>
-
-<table
-  id="body_info"
-  class="display table table-striped nowrap"
-  style="width: 100%"
->
-  <thead>
-    <tr>
-      <th>Ad-Soyad</th>
-      <th>Ayakkabı Numarası</th>
-      <th>Üst Kıyafet Size</th>
-      <th>Pantolon Size</th>
-      <th>Ceket Size</th>
-      <th>Eldiven Size</th>
-      <th>Baret Size</th>
-      <th>İşlem</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% body_info.forEach(body_info => { %>
-    <tr>
-      <td><%= body_info.first_name %> <%= body_info.last_name %></td>
-      <td><%= body_info.shoe_size %></td>
-      <td><%= body_info.clothing_size %></td>
-      <td><%= body_info.pant_size %></td>
-      <td><%= body_info.coat_size %></td>
-      <td><%= body_info.glove_size %></td>
-      <td><%= body_info.helmet_size %></td>
-      <td>
-        <a href="/edit/<%= body_info.id %>" class="btn btn-warning btn-sm"
-          >Düzenle</a
-        >
-        <a
-          href="/delete/<%= body_info.id %>"
-          class="btn btn-danger btn-sm"
-          onclick="return confirm('Silmek istediğinize emin misiniz?')"
-          >Sil</a
-        >
-      </td>
-    </tr>
-    <% }); %>
-  </tbody>
-  <tfoot>
-    <tr>
-      <th>Ad-Soyad</th>
-      <th>Ayakkabı Numarası</th>
-      <th>Üst Kıyafet Size</th>
-      <th>Pantolon Size</th>
-      <th>Ceket Size</th>
-      <th>Eldiven Size</th>
-      <th>Baret Size</th>
-      <th>İşlem</th>
-    </tr>
-  </tfoot>
-</table>
-
 <script>
+  function ellipsis(text, maxLength) {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  }
   $(document).ready(function () {
-    var bodyTable = $("#body_info").DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: true,
-      scrollX: true,
+    var table = $("#body_info").DataTable({
+      ajax: {
+        url: "/admin/calisanlar/body/data",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "employee_id" },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return data ? `${data} ${row.last_name || "N/A"}` : "N/A";
+          },
+        },
+        {
+          data: "shoe_size",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "clothing_size",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "pant_size",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "coat_size",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "glove_size",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "helmet_size",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "id",
+          render: function (data) {
+            return `<a href="/edit/size/${data}" class="btn btn-warning btn-sm">
+                <ion-icon name="create-outline"></ion-icon>
+              </a>
+              <a href="/delete/size/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                <ion-icon name="trash"></ion-icon>
+              </a>`;
+          },
+        },
+      ],
+
       fixedColumns: {
         leftColumns: 1,
       },
+      fixedHeader: true,
+      scrollCollapse: true,
+      scrollY: "100vh",
+      scrollX: true,
+      //sayfalama kısmındaki menü kısmını düzenlmeye yarar.
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
       language: {
         lengthMenu: "Sayfa başına _MENU_ kayıt göster",
         zeroRecords: "Kayıt bulunamadı",
@@ -93,21 +125,8 @@
           previous: "Önceki",
         },
       },
-      columnDefs: [
-        {
-          targets: "_all",
-          render: function (data, type, row, meta) {
-            if (meta.col === 7) {
-              return data;
-            }
-            if (type === "display" && data.length > 30) {
-              return data.substr(0, 30) + "...";
-            }
 
-            return data;
-          },
-        },
-      ],
+      //her satırın altında kendine ait bir arama kısmı oluşturmak için yazıldı.
       initComplete: function () {
         this.api()
           .columns()
@@ -126,29 +145,13 @@
             });
           });
       },
-      fixedHeader: {
-        footer: true,
-      },
     });
 
-    // Select2 ile sütun seçici
-    $("#body-column-select").select2({
-      placeholder: "Seçin",
-    });
-    $("#body-column-select").on("change", function () {
-      var selectedColumns = $(this).val();
+    //tıklanan satırın bilgilerini alır. bu özelliği kullanarak silme ve benzeri işlemleri yapacağız.
+    table.on("click", "tbody tr", function () {
+      let data = table.row(this).data();
 
-      // Tüm sütunları gizle
-      for (var i = 0; i < bodyTable.columns().count(); i++) {
-        bodyTable.column(i).visible(false);
-      }
-
-      // Seçilen sütunları görünür yap
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          bodyTable.column(value).visible(true);
-        });
-      }
+      alert("You clicked on " + data[0] + "'s row");
     });
   });
 </script>

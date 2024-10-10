@@ -79,34 +79,137 @@ LEFT JOIN
 ON
     ebm.employee_id = e.employee_id`;
 
+const announcement_sql = `SELECT 
+    a.*,
+    e.first_name,
+    e.last_name, 
+    ac.name
+FROM 
+    announcements a
+LEFT JOIN 
+    announcement_category_relations acr ON a.id = acr.announcement_id
+LEFT JOIN 
+    announcement_categories ac ON acr.category_id = ac.id
+LEFT JOIN 
+    employees e ON a.published_by = e.employee_id
+WHERE 
+    a.status = 'active' 
+AND 
+    a.publish_date <= CURRENT_TIMESTAMP 
+AND 
+    (expiry_date IS NULL OR expiry_date > CURRENT_TIMESTAMP)
+`;
+const announcement_category_sql = `SELECT * FROM announcement_categories`
+
 router.get("/", (req, res) => {
     res.render("admin/admin.ejs");
 });
-// Duyurular route
+
 router.get("/duyurular", (req, res) => {
     res.render("admin/aduyurular.ejs");
 });
 
-// Çalışanlar route
-router.get('/calisanlar', async (req, res) => {
+// Dinamik veriyi JSON formatında döndüren route
+router.get("/duyurular/data", async (req, res) => {
     try {
-        const user_info_result = await db.query(user_info_sql);
-        const job_info_result = await db.query(job_info_sql);
-        const personal_info_result = await db.query(personal_info_sql);
-        const contact_info_result = await db.query(contact_info_sql);
-        const education_info_result = await db.query(education_info_sql);
-        const body_info_result = await db.query(body_info_sql);
+        const result = await db.query(announcement_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.post('/duyurular/data', async (req, res) => {
+    const { title, content, published_by, publish_date, expiry_date, status, created_at, category_id } = req.body;
+    if (!published_by) {
+        console.error('published_by alanı tanımsız!');
+        return res.status(400).json({ error: 'published_by alanı gerekli' });
+    }
+    try {
+        const result = await db.query(
+            `INSERT INTO announcements (title, content, published_by, publish_date, expiry_date, status, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [title, content, published_by, publish_date, expiry_date, status, created_at]
+        );
 
-        res.render('admin/calisanlar.ejs', {
-            employees: user_info_result.rows, job_info: job_info_result.rows,
-            personal_info: personal_info_result.rows, contact_info: contact_info_result.rows,
-            education_info: education_info_result.rows, body_info: body_info_result.rows,
-        });
+        const announcementId = result.rows[0].id;
 
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Bir hata oluştu.');
+        await db.query(
+            `INSERT INTO announcement_category_relations (announcement_id, category_id)
+             VALUES ($1, $2)`,
+            [announcementId, category_id]
+        );
+
+        res.status(201).json({ id: announcementId });
+    } catch (error) {
+        console.error('Veri ekleme hatası:', error);
+        res.status(500).json({ error: 'Veri eklenirken bir hata oluştu' });
+    }
+});
+router.get("/duyurular/category/data", async (req, res) => {
+    try {
+        const result = await db.query(announcement_category_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
+router.get("/calisanlar/user/data", async (req, res) => {
+    try {
+        const result = await db.query(user_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/calisanlar/job/data", async (req, res) => {
+    try {
+        const result = await db.query(job_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}); router.get("/calisanlar/personal/data", async (req, res) => {
+    try {
+        const result = await db.query(personal_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/calisanlar/contact/data", async (req, res) => {
+    try {
+        const result = await db.query(contact_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/calisanlar/education/data", async (req, res) => {
+    try {
+        const result = await db.query(education_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/calisanlar/body/data", async (req, res) => {
+    try {
+        const result = await db.query(body_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get('/calisanlar', async (req, res) => {
+    res.render('admin/calisanlar.ejs');
+});
 export default router;

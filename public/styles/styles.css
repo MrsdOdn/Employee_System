@@ -9,7 +9,30 @@
     --black1: #2b2b31e6;
     --light-black: #4b4b4b;
     --black2: #00000033;
+
 }
+
+/* kaydet ekle gibi işlemler için */
+.btn-primary {
+    background-color: #009485ff;
+    border-color: #009485ff;
+    color: white;
+}
+
+/* silme işlemleri için */
+.btn-danger {
+    background-color: #ff4d4f;
+    border-color: #ff4d4f;
+    color: white;
+}
+
+/*geri ve iptal butonları için*/
+.btn-secondary {
+    background-color: #808080;
+    border-color: #808080;
+    color: white;
+}
+
 
 * {
     margin: 0;
@@ -75,6 +98,37 @@ th {
     background-color: #f2f2f2;
 }
 
+tfoot input {
+    width: 100%;
+}
+
+table.dataTable thead th,
+table.dataTable tfoot th {
+    background-color: #009485;
+    /* Arka plan rengi */
+    color: white;
+    /* Yazı rengi */
+    text-align: center;
+    /* Yazıları ortala */
+    font-weight: bold;
+    /* Kalın yazı */
+    border-bottom: 2px solid #004d40;
+    /* Alt kenarlık */
+}
+
+
+.dataTables_scrollHeadInner,
+.dataTables_scrollFootInner {
+    box-sizing: content-box;
+    width: 100% !important;
+    padding-right: 0 !important;
+}
+
+.display.dataTable {
+    width: 100% !important;
+    margin-left: 0;
+}
+
 .tab-icon {
     margin-left: 5px;
     color: var(--light-green);
@@ -98,9 +152,7 @@ th {
     min-width: 200px;
 }
 
-tfoot input {
-    width: 100%;
-}
+
 
 .announcement-card {
     background-color: #e8e8e8;
@@ -112,12 +164,13 @@ tfoot input {
     background-color: var(--light-green);
     color: var(--white);
     font-size: 1.5rem;
+    display: flex;
     align-items: center;
     justify-content: center;
-    
+
 }
 
-.btn-annoucement > ion-icon {
+.btn-annoucement>ion-icon {
     color: var(--white);
     font-size: 2rem;
     margin-left: 5px;
@@ -131,7 +184,7 @@ tfoot input {
     }
 
     .log-reg-container {
-        max-width: 50%;
+        max-width: 70%;
     }
 
     .navbar {
@@ -145,6 +198,10 @@ tfoot input {
     th,
     td {
         padding: 10px;
+    }
+
+    tfoot {
+        visibility: hidden;
     }
 }
 

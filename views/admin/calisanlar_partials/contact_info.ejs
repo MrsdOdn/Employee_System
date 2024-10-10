@@ -1,86 +1,109 @@
-<div class="tab-content" id="nav-tabContent">
-  <div class="mb-3 inline-block-container">
-    <label>Gösterilecek bilgiler:</label>
-    <select id="contact-column-select" class="form-control" multiple="multiple">
-      <option value="1">Çalışan ID</option>
-      <option value="0">Ad-Soyad</option>
-      <option value="2">Adres Tipi</option>
-      <option value="3">Şehir</option>
-      <option value="4">Semt</option>
-      <option value="5">Tam Adres</option>
-      <option value="6">Acil Durum Numarası</option>
-    </select>
-  </div>
+<div class="container mb-3">
+  <table
+    id="contact_info"
+    class="display"
+    style="width: 100%"
+  >
+    <thead>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Adres Tipi</th>
+        <th>Şehir</th>
+        <th>Semt</th>
+        <th>Tam Adres</th>
+        <th>Acil Durum Numarası</th>
+        <th>İşlem</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>Ad-Soyad</th>
+        <th>Adres Tipi</th>
+        <th>Şehir</th>
+        <th>Semt</th>
+        <th>Tam Adres</th>
+        <th>Acil Durum Numarası</th>
+        <th>İşlem</th>
+      </tr>
+    </tfoot>
+  </table>
 </div>
 
-<table
-  id="contact_info"
-  class="display table table-striped nowrap"
-  style="width: 100%"
->
-  <thead>
-    <tr>
-      <th>Çalışan ID</th>
-      <th>Ad-Soyad</th>
-      <th>Adres Tipi</th>
-      <th>Şehir</th>
-      <th>Semt</th>
-      <th>Tam Adres</th>
-      <th>Acil Durum Numarası</th>
-      <th>İşlem</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% contact_info.forEach(contact_info => { %>
-    <tr>
-      <td><%= contact_info.employee_id %></td>
-      <td><%= contact_info.first_name %> <%= contact_info.last_name %></td>
-      <td><%= contact_info.address_type %></td>
-      <td><%= contact_info.city %></td>
-      <td><%= contact_info.state %></td>
-      <td><%= contact_info.full_address %></td>
-      <td><%= contact_info.emergency_contact %></td>
-      <td>
-        <a href="/edit/<%= contact_info.id %>" class="btn btn-warning btn-sm"
-          >Düzenle</a
-        >
-        <a
-          href="/delete/<%= contact_info.id %>"
-          class="btn btn-danger btn-sm"
-          onclick="return confirm('Silmek istediğinize emin misiniz?')"
-          >Sil</a
-        >
-      </td>
-    </tr>
-    <% }); %>
-  </tbody>
-  <tfoot>
-    <tr>
-      <th>Çalışan ID</th>
-      <th>Ad-Soyad</th>
-      <th>Adres Tipi</th>
-      <th>Şehir</th>
-      <th>Semt</th>
-      <th>Tam Adres</th>
-      <th>Acil Durum Numarası</th>
-      <th>İşlem</th>
-    </tr>
-  </tfoot>
-</table>
-
 <script>
+  function ellipsis(text, maxLength) {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  }
   $(document).ready(function () {
     var table = $("#contact_info").DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: true,
-      scrollX: true,
+      ajax: {
+        url: "/admin/calisanlar/contact/data",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "employee_id" },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return data ? `${data} ${row.last_name}` : "N/A";
+          },
+        },
+        {
+          data: "address_type",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "city",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "state",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "full_address",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "emergency_contact",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "address_id",
+          render: function (data) {
+            return `<a href="/edit/address/${data}" class="btn btn-warning btn-sm">
+                    <ion-icon name="create-outline"></ion-icon></a>
+                    <a href="/delete/address/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                    <ion-icon name="trash"></ion-icon></a>`;
+          },
+        },
+      ],
       fixedColumns: {
         leftColumns: 1,
       },
+      fixedHeader: true,
+      scrollCollapse: true,
+      scrollY: "100vh",
+      scrollX: true,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
       language: {
         lengthMenu: "Sayfa başına _MENU_ kayıt göster",
         zeroRecords: "Kayıt bulunamadı",
@@ -95,21 +118,6 @@
           previous: "Önceki",
         },
       },
-      columnDefs: [
-        {
-          targets: "_all",
-          render: function (data, type, row, meta) {
-            if (meta.col === 7) {
-              return data;
-            }
-            if (type === "display" && data.length > 30) {
-              return data.substr(0, 30) + "...";
-            }
-
-            return data;
-          },
-        },
-      ],
       initComplete: function () {
         this.api()
           .columns()
@@ -128,23 +136,6 @@
             });
           });
       },
-    });
-
-    $("#contact-column-select").select2({
-      placeholder: "Seçin",
-    });
-    $("#contact-column-select").on("change", function () {
-      var selectedColumns = $(this).val();
-
-      for (var i = 0; i < table.columns().count(); i++) {
-        table.column(i).visible(false);
-      }
-
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          table.column(value).visible(true);
-        });
-      }
     });
   });
 </script>

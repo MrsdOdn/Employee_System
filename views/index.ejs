@@ -1,11 +1,25 @@
-<%- include("./partials/header.ejs") %>
-<div class="jumbotron centered">
+<body class="log-reg-body">
+  <%- include("./partials/header.ejs") %>
+
+  <div class="log-reg-box">
     <div class="container">
-      <i class="fas fa-key fa-6x"></i>
-      <h1 class="display-3">Employee</h1>
-      <hr />
-      <a class="btn btn-light btn-lg" href="/register" role="button">Register</a>
-      <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
+      <div class="row justify-content-center">
+        <div class="col-md-6 log-reg-container">
+          <h1 class="text-center text-white">
+            Çalışan Yönetim Sistemi <i class="bi bi-people"></i
+            ><i class="fas fa-users fa-6x"></i>
+          </h1>
+          <div class="d-flex justify-content-between flex-wrap">
+            <a class="btn btn-light btn-lg m-1" href="/register" role="button"
+              >Register <i class="fas fa-user-plus"></i
+            ></a>
+            <a class="btn btn-light btn-lg m-1" href="/login" role="button"
+              >Login <i class="fas fa-sign-in-alt"></i
+            ></a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  
+  <%- include("./partials/footer.ejs") %>
+</body>

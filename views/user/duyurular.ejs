@@ -31,3 +31,18 @@
     <% }); %>
   </div>
 </div>
+<script>
+  $(document).ready(function() {
+    $.ajax({
+      url: '/user/duyurular/data',
+      dataSrc: "",
+      method: 'GET',
+      success: function (data) {
+        const $categorySelect = $("#announcementCategory");
+      },
+      error: function (err) {
+        console.error("Kategoriler yüklenirken hata oluştu", err);
+      }
+    });
+  });
+</script>

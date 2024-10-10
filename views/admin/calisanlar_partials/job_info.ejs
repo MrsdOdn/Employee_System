@@ -1,5 +1,5 @@
 <div class="tab-content" id="nav-tabContent">
-  <div class="mb-3 inline-block-container select2-container">
+  <!--   <div class="mb-3 inline-block-container select2-container">
     <label>Gösterilecek bilgiler:</label>
     <select id="job-column-select" class="form-control" multiple="multiple">
       <option value="0">Çalışan ID</option>
@@ -14,12 +14,8 @@
       <option value="9">Çıkış Tarihi</option>
       <option value="10">Grup</option>
     </select>
-  </div>
-  <table
-    id="job-info"
-    class="display table table-striped nowrap"
-    style="width: 100%"
-  >
+  </div> -->
+  <table id="job-info" class="display" style="width: 100%">
     <thead>
       <tr>
         <th>Çalışan ID</th>
@@ -36,36 +32,7 @@
         <th>İşlemler</th>
       </tr>
     </thead>
-    <tbody>
-      <% job_info.forEach(job_info => { %>
-      <tr>
-        <td><%= job_info.employee_id %></td>
-        <td><%= job_info.first_name %> <%= job_info.last_name %></td>
-        <td><%= job_info.department %></td>
-        <td><%= job_info.division %></td>
-        <td><%= job_info.employee_type %></td>
-        <td><%= job_info.title %></td>
-        <td><%= job_info.task %></td>
-        <td><%= job_info.job_description %></td>
-        <td>
-          <%= moment(job_info.employment_start_date).format('DD-MM-YYYY') %>
-        </td>
-        <td><%= moment(job_info.termination_date).format('DD-MM-YYYY') %></td>
-        <td><%= job_info.group_name %></td>
-        <td>
-          <a href="/edit/<%= job_info.id %>" class="btn btn-warning btn-sm"
-            >Düzenle</a
-          >
-          <a
-            href="/delete/<%= job_info.id %>"
-            class="btn btn-danger btn-sm"
-            onclick="return confirm('Silmek istediğinize emin misiniz?')"
-            >Sil</a
-          >
-        </td>
-      </tr>
-      <% }); %>
-    </tbody>
+    <tbody></tbody>
     <tfoot>
       <tr>
         <th>Çalışan ID</th>
@@ -87,16 +54,69 @@
 <script>
   $(document).ready(function () {
     var table = $("#job-info").DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: true,
-      scrollX: true,
+      ajax: {
+        url: "/admin/calisanlar/job/data",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "employee_id" },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return `${row.first_name} ${row.last_name}`;
+          },
+        },
+        { data: "department" },
+        { data: "division" },
+        { data: "employee_type" },
+        { data: "title" },
+        { data: "task" },
+        {
+          data: "job_description",
+          render: function (data) {
+            return `<span class="ellipsis">${ellipsis(data, 100)}</span>`;
+          },
+        },
+        {
+          data: "employment_start_date",
+          render: function (data) {
+            return moment(data).format("DD/MM/YYYY");
+          },
+        },
+        {
+          data: "termination_date",
+          render: function (data) {
+            return data ? moment(data).format("DD/MM/YYYY") : "N/A";
+          },
+        },
+        {
+          data: "group_name",
+          render: function (data) {
+            return data ? data : "-";
+          },
+        },
+        {
+          data: "employee_id",
+          render: function (data, type, row) {
+            return `<a href="/edit/${data}" class="btn btn-warning btn-sm">
+                    <ion-icon name="create-outline"></ion-icon>
+                    <a href="/delete/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                    <ion-icon name="trash"></ion-icon></a>`;
+          },
+        },
+      ],
       fixedColumns: {
         leftColumns: 1,
       },
+      fixedHeader: true,
+      scrollCollapse: true,
+      scrollY: "100vh",
+      scrollX: true,
+      //sayfalama kısmındaki menü kısmını düzenlmeye yarar.
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
       language: {
         lengthMenu: "Sayfa başına _MENU_ kayıt göster",
         zeroRecords: "Kayıt bulunamadı",
@@ -111,33 +131,18 @@
           previous: "Önceki",
         },
       },
-      columnDefs: [
-        {
-          targets: "_all",
-          render: function (data, type, row, meta) {
-            if (meta.col === 11) {
-              return data;
-            }
-            if (type === "display" && data.length > 30) {
-              return data.substr(0, 30) + "...";
-            }
-
-            return data;
-          },
-        },
-      ],
       initComplete: function () {
+        // Her sütun için footer'da arama kutuları oluştur
         this.api()
           .columns()
           .every(function () {
             let column = this;
             let title = column.footer().textContent;
-
             let input = document.createElement("input");
             input.placeholder = title;
             column.footer().replaceChildren(input);
 
-            input.addEventListener("keyup", () => {
+            input.addEventListener("keyup", function () {
               if (column.search() !== input.value) {
                 column.search(input.value).draw();
               }
@@ -145,25 +150,18 @@
           });
       },
     });
-  });
-  $(document).ready(function () {
-    $("#job-column-select").select2({
-      placeholder: "Seçin",
-      allowClear: true,
-      closeOnSelect: false,
-    });
-  });
-  $("#job-column-select").on("change", function () {
-    var selectedColumns = $(this).val();
 
-    for (var i = 0; i < table.columns().count(); i++) {
-      table.column(i).visible(false);
-    }
+    /*     // Seçilen sütunlara göre görünürlüğü ayarlama
+    $("#job-column-select").on("change", function () {
+      var selectedColumns = $(this).val();
+      table.columns().visible(false); // Tüm sütunları gizle
 
-    if (selectedColumns) {
-      $.each(selectedColumns, function (index, value) {
-        table.column(value).visible(true);
-      });
-    }
+      // Seçilen sütunları göster
+      if (selectedColumns) {
+        $.each(selectedColumns, function (index, value) {
+          table.column(value).visible(true);
+        });
+      }
+    }); */
   });
 </script>

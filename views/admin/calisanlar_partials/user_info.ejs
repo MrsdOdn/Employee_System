@@ -1,77 +1,91 @@
-<div class="tab-content" id="nav-tabContent">
-  <div class="mb-3 inline-block-container">
-    <label>Gösterilecek bilgiler:</label>
-    <select id="column-select" class="form-control" multiple="multiple">
-      <option value="4">Çalışan ID</option>
-      <option value="0">Ad-Soyad</option>
-      <option value="1">Email</option>
-      <option value="2">Telefon</option>
-      <option value="3">İşlem</option>
-    </select>
-  </div>
+<div class="container mb-3">
+  <table id="employees" class="display" style="width: 100%">
+    <thead>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>TC No</th>
+        <th>Ad-Soyad</th>
+        <th>Email</th>
+        <th>Telefon</th>
+        <th>Profil Fotoğrafı</th>
+        <th>Güncellendiği Tarih</th>
+        <th>İşlem</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <th>Çalışan ID</th>
+        <th>TC No</th>
+        <th>Ad-Soyad</th>
+        <th>Email</th>
+        <th>Telefon</th>
+        <th>Profil Fotoğrafı</th>
+        <th>Güncellendiği Tarih</th>
+        <th>İşlem</th>
+      </tr>
+    </tfoot>
+  </table>
 </div>
-
-<table
-  id="employees"
-  class="display table table-striped nowrap"
-  style="width: 100%"
->
-  <thead>
-    <tr>
-      <th>Çalışan ID</th>
-      <th>Ad-Soyad</th>
-      <th>Email</th>
-      <th>Telefon</th>
-      <th>İşlem</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% employees.forEach(employee => { %>
-    <tr>
-      <td><%= employee.employee_id %></td>
-      <td><%= employee.first_name %> <%= employee.last_name %></td>
-      <td><%= employee.email %></td>
-      <td><%= employee.phone_number %></td>
-      <td>
-        <a
-          href="/edit/<%= employee.employee_id %>"
-          class="btn btn-warning btn-sm"
-          >Düzenle</a
-        >
-        <a
-          href="/delete/<%= employee.employee_id %>"
-          class="btn btn-danger btn-sm"
-          onclick="return confirm('Silmek istediğinize emin misiniz?')"
-          >Sil</a
-        >
-      </td>
-    </tr>
-    <% }); %>
-  </tbody>
-  <tfoot>
-    <tr>
-      <th>Çalışan ID</th>
-      <th>Ad-Soyad</th>
-      <th>Email</th>
-      <th>Telefon</th>
-      <th>İşlem</th>
-    </tr>
-  </tfoot>
-</table>
-
 <script>
+  function ellipsis(text, maxLength) {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  }
   $(document).ready(function () {
     var table = $("#employees").DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: true,
-      scrollX: true,
+      ajax: {
+        url: "/admin/calisanlar/user/data",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "employee_id" },
+        { data: "tc_no" },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return `${row.first_name} ${row.last_name}`;
+          },
+        },
+        { data: "email" },
+
+        { data: "phone_number" },
+        {
+          data: "profile_image",
+          render: function (data, type, row) {
+            return `<span class="ellipsis">${ellipsis(data, 200)}</span>`;
+          },
+        },
+        {
+          data: "updated_at",
+          render: function (data) {
+            return data ? moment(data).format("DD/MM/YYYY") : "N/A";
+          },
+        },
+        {
+          data: "employee_id",
+          render: function (data, type, row) {
+            return `<a href="/edit/${data}" class="btn btn-warning btn-sm">
+                    <ion-icon name="create-outline"></ion-icon>
+                    <a href="/delete/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                    <ion-icon name="trash"></ion-icon></a>`;
+          },
+        },
+      ],
       fixedColumns: {
         leftColumns: 1,
       },
+      fixedHeader: true,
+      scrollCollapse: true,
+      scrollY: "100vh",
+      scrollX: true,
+      //sayfalama kısmındaki menü kısmını düzenlmeye yarar.
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
       language: {
         lengthMenu: "Sayfa başına _MENU_ kayıt göster",
         zeroRecords: "Kayıt bulunamadı",
@@ -86,22 +100,8 @@
           previous: "Önceki",
         },
       },
-      columnDefs: [
-        {
-          targets: "_all",
-          render: function (data, type, row, meta) {
-            // Eğer hücre işlem butonu içeriyorsa, orijinal veriyi döndür
-            if (meta.col === 4) {
-              return data;
-            }
-            if (type === "display" && data.length > 30) {
-              return data.substr(0, 30) + "...";
-            }
 
-            return data;
-          },
-        },
-      ],
+      //her satırın altında kendine ait bir arama kısmı oluşturmak için yazıldı.
       initComplete: function () {
         this.api()
           .columns()
@@ -122,25 +122,11 @@
       },
     });
 
-    /* $('.toggle').on('click', function() {
-      table.columns.adjust().responsive.recalc();
-    }); */
+    //tıklanan satırın bilgilerini alır. bu özelliği kullanarak silme ve benzeri işlemleri yapacağız.
+    table.on("click", "tbody tr", function () {
+      let data = table.row(this).data();
 
-    $("#column-select").select2({
-      placeholder: "Seçin",
-    });
-    $("#column-select").on("change", function () {
-      var selectedColumns = $(this).val();
-
-      for (var i = 0; i < table.columns().count(); i++) {
-        table.column(i).visible(false);
-      }
-
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          table.column(value).visible(true);
-        });
-      }
+      alert("You clicked on " + data[0] + "'s row");
     });
   });
 </script>

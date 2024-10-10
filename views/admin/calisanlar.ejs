@@ -1,4 +1,4 @@
-<h3 class="employee-h3">Personel Bilgi Sistemi</h3>
+<h3 class="employee-h3 mb-3">Personel Bilgi Sistemi</h3>
 <nav class="mb-2">
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
     <button
@@ -143,17 +143,49 @@
     const $tabButtons = $(".nav-link");
     const $tabIcons = $(".tab-icon");
 
-    $tabButtons.on("click", function () {
+    const selectedTab = localStorage.getItem("selectedTab") || "#nav-user";
+    $(".tab-pane").removeClass("show active").hide();
+    $(selectedTab).addClass("show active").fadeIn();
+
+    const updateActiveTab = (target) => {
       $tabButtons.removeClass("active");
       $tabIcons.removeClass("tab-icon-active");
 
-      $(this).addClass("active");
-      $(this).find(".tab-icon").addClass("tab-icon-active");
+      const $activeButton = $tabButtons.filter(`[data-bs-target="${target}"]`);
+      $activeButton.addClass("active");
+      $activeButton.find(".tab-icon").addClass("tab-icon-active");
+    };
+
+    updateActiveTab(selectedTab);
+
+    $tabButtons.on("click", function () {
+      const target = $(this).data("bs-target");
 
       $(".tab-pane").removeClass("show active").hide();
-
-      const target = $(this).data("bs-target");
       $(target).addClass("show active").fadeIn();
+
+      localStorage.setItem("selectedTab", target);
+
+      updateActiveTab(target);
     });
   });
 </script>
+
+<!-- 
+<script>
+  $(document).ready(function () {
+    const selectedTab = localStorage.getItem("selectedTab") || "#nav-user"; // Varsayılan olarak "Kullanıcı Bilgileri" sekmesi
+    $(".tab-pane").removeClass("show active").hide(); // Tüm sekmeleri gizle
+    $(selectedTab).addClass("show active").fadeIn(); // Seçilen sekmeyi göster
+
+    // Tab butonlarına tıklama olayını yönet
+    $(".nav-link").on("click", function () {
+      const target = $(this).data("bs-target");
+      localStorage.setItem("selectedTab", target); // Seçilen sekmeyi sakla
+
+      // Aktif sekmeyi göster
+      $(".tab-pane").removeClass("show active").hide(); // Tüm sekmeleri gizle
+      $(target).addClass("show active").fadeIn(); // Seçilen sekmeyi göster
+    });
+  });
+</script> -->
