@@ -1,48 +1,68 @@
 <div class="container mt-1">
   <h1>Duyurular</h1>
-  <div class="row">
-    <% announcement.forEach(announcement => { %>
-    <div class="col-md-4 mb-4">
-      <div class="card announcement-card">
-        <div class="card-body">
-          <h5 class="card-title"><%= announcement.title %></h5>
-          <p class="card-text"><%= announcement.content %></p>
-          <!-- <p class="card-text">
-            <small class="text-muted"
-              >Yayınlayan:  announcement.published_by </small
-            >
-          </p> -->
-          <p class="card-text">
-            <small class="text-muted"
-              >Yayın Tarihi: <%=
-              moment(announcement.publish_date).format('DD/MM/YYYY HH:mm')
-              %></small
-            >
-          </p>
-          <p class="card-text">
-            <small class="text-muted"
-              >Kategorisi: <%= announcement.category_name %></small
-            >
-          </p>
-          <a href="#" class="btn">Detaylar</a>
-        </div>
-      </div>
-    </div>
-    <% }); %>
-  </div>
+  <div class="row" id="announcementContainer"></div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script>
-  $(document).ready(function() {
+  $(document).ready(function () {
     $.ajax({
-      url: '/user/duyurular/data',
-      dataSrc: "",
-      method: 'GET',
+      url: "/admin/duyurular/data",
+      method: "GET",
       success: function (data) {
-        const $categorySelect = $("#announcementCategory");
+        const announcementContainer = $("#announcementContainer");
+        announcementContainer.empty(); // içeriği temizle
+
+        data.forEach((announcement) => {
+          const announcementCard = `
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+              <div class="card announcement-card black-backend d-flex flex-column">
+                <div class="card-body">
+                  <h5 class="card-title">${announcement.title}</h5>
+                  <p class="card-text content-short" id="content-${
+                    announcement.id
+                  }">${announcement.content}</p>
+                  <button class="btn btn-link show-more btn-primary" data-id="${
+                    announcement.id
+                  }">Detaylar</button>
+                  <p class="card-text">
+                    <small class="text-muted">
+                      Yayın Tarihi: ${moment(announcement.publish_date).format(
+                        "DD/MM/YYYY HH:mm"
+                      )}
+                    </small>
+                  </p>
+                  <p class="card-text">
+                    <small class="text-muted">
+                      Kategorisi: ${announcement.category_name}
+                    </small>
+                  </p>
+                </div>
+              </div>
+            </div>
+          `;
+          announcementContainer.append(announcementCard);
+        });
+
+        $(".show-more").on("click", function () {
+          const id = $(this).data("id");
+          const content = $(`#content-${id}`);
+
+          if (content.hasClass("content-short")) {
+            content.removeClass("content-short");
+            $(this).text("Gizle");
+          } else {
+            content.addClass("content-short");
+            $(this).text("Detaylar");
+          }
+        });
       },
       error: function (err) {
-        console.error("Kategoriler yüklenirken hata oluştu", err);
-      }
+        console.error("Duyurular yüklenirken hata oluştu:", err);
+      },
     });
   });
 </script>
+
+<style></style>

@@ -1,0 +1,65 @@
+<%- include("header.ejs") %>
+<div
+  class="modal fade"
+  id="deleteModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="deleteModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog " role="document">
+    <div class="modal-content black-backend">
+      <div class="modal-header">
+        <i class="fas fa-trash fa-2x"></i>
+        <h5 class="modal-title" id="deleteModalLabel">Silme Onayı</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Kapat"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">Bu kaydı silmek istediğinize emin misiniz?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          İptal
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+          Sil
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let deleteUrl = "";
+  let deleteId = "";
+
+  function confirmDelete(url, id) {
+    deleteUrl = url;
+    deleteId = id;
+    $("#deleteModal").modal("show");
+  }
+
+  $(document).ready(function () {
+    event.preventDefault();
+    $("#confirmDeleteBtn").click(function () {
+      $.ajax({
+        url: deleteUrl,
+        type: "DELETE",
+        success: function (response) {
+          alert("Kayıt başarıyla silindi!");
+          location.reload();
+        },
+        error: function (xhr, status, error) {
+          alert("Silme işlemi başarısız oldu: " + xhr.responseText);
+        },
+      });
+
+      $("#deleteModal").modal("hide");
+    });
+  });
+</script>

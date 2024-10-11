@@ -11,11 +11,12 @@ import db from "./config/db.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import moment from "moment";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 const port = 3000;
-
+app.use(cors());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -26,6 +27,7 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
@@ -66,7 +68,7 @@ app.use((req, res, next) => {
 
 app.get('/api/user', (req, res) => {
     if (req.isAuthenticated()) {
-        res.json(req.user); 
+        res.json(req.user);
     } else {
         res.status(401).json({ message: 'Not authenticated' });
     }

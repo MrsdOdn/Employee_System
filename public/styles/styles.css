@@ -46,7 +46,13 @@ body {
 }
 
 
-
+.black-backend {
+    background-color: var(--black1);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 8px var(--black2);
+    color: var(--white);
+}
 
 .log-reg-body {
     background-image: url('../images/background_log.png');
@@ -152,14 +158,6 @@ table.dataTable tfoot th {
     min-width: 200px;
 }
 
-
-
-.announcement-card {
-    background-color: #e8e8e8;
-    border-radius: "20px";
-    box-shadow: "0 0 10px 10px";
-}
-
 .btn-annoucement {
     background-color: var(--light-green);
     color: var(--white);
@@ -169,6 +167,34 @@ table.dataTable tfoot th {
     justify-content: center;
 
 }
+
+
+.content-short {
+    max-height: auto;
+    /* Görüntülenecek maksimum yükseklik */
+    overflow: hidden;
+    /* Taşan metni gizle */
+    text-overflow: ellipsis;
+    /* Taşan metni '...' ile göster */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    /* Kaç satır gösterileceğini belirtin */
+}
+
+.announcement-card {
+    display: flex;
+    flex-direction: column;
+    /* Kart içeriğini dikey düzenle */
+    height: 100%;
+    /* Kartın yüksekliğini ayarlayın */
+}
+
+.card-body {
+    flex-grow: 1;
+    /* Kartın içeriğini mümkün olduğunca genişlet */
+}
+
 
 .btn-annoucement>ion-icon {
     color: var(--white);
@@ -210,7 +236,9 @@ table.dataTable tfoot th {
     .log-reg-container {
         max-width: 35%;
     }
-
+    tfoot {
+        visibility: hidden;
+    }
 
 }
 

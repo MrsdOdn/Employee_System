@@ -1,20 +1,4 @@
 <div class="tab-content" id="nav-tabContent">
-  <!--   <div class="mb-3 inline-block-container select2-container">
-    <label>Gösterilecek bilgiler:</label>
-    <select id="job-column-select" class="form-control" multiple="multiple">
-      <option value="0">Çalışan ID</option>
-      <option value="1">Ad-Soyad</option>
-      <option value="2">Çalıştığı Bölüm</option>
-      <option value="3">Çalıştığı Birim</option>
-      <option value="4">Çalışan Türü</option>
-      <option value="5">Unvanı</option>
-      <option value="6">Görev</option>
-      <option value="7">Yaptığı İş</option>
-      <option value="8">İşe Giriş Tarihi</option>
-      <option value="9">Çıkış Tarihi</option>
-      <option value="10">Grup</option>
-    </select>
-  </div> -->
   <table id="job-info" class="display" style="width: 100%">
     <thead>
       <tr>
@@ -105,6 +89,29 @@
           },
         },
       ],
+      dom: "Blfrtip", // Butonlar ve filtreler için yapılandırma
+      buttons: [
+        {
+          extend: "colvis",
+          text: '<i class="fa fa-eye" data-toggle="tooltip" title="Kolonları Göster/Gizle"></i>',
+        },
+        {
+          extend: "excelHtml5",
+          text: '<i class="fa fa-file-excel-o" data-toggle="tooltip" data-original-title="Excel\'e Aktar"></i>',
+          title: "Çalışanlar " + moment(new Date()).format("DD-MM-YYYY"),
+          exportOptions: {
+            columns: ":visible",
+          },
+        },
+        {
+          extend: "print",
+          text: '<i class="fa fa-print" data-toggle="tooltip" data-original-title="Yazdır"></i>',
+          title: "Çalışanlar " + moment(new Date()).format("DD-MM-YYYY"),
+          exportOptions: {
+            columns: ":visible",
+          },
+        },
+      ],
       fixedColumns: {
         leftColumns: 1,
       },
@@ -118,7 +125,7 @@
         [10, 25, 50, "All"],
       ],
       language: {
-        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        lengthMenu: " _MENU_ Sayfa başı kayıt Sayısı",
         zeroRecords: "Kayıt bulunamadı",
         info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
         infoEmpty: "Kayıt yok",
@@ -150,18 +157,6 @@
           });
       },
     });
-
-    /*     // Seçilen sütunlara göre görünürlüğü ayarlama
-    $("#job-column-select").on("change", function () {
-      var selectedColumns = $(this).val();
-      table.columns().visible(false); // Tüm sütunları gizle
-
-      // Seçilen sütunları göster
-      if (selectedColumns) {
-        $.each(selectedColumns, function (index, value) {
-          table.column(value).visible(true);
-        });
-      }
-    }); */
+    $('[data-toggle="tooltip"]').tooltip();
   });
 </script>

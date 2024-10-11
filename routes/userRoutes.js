@@ -25,8 +25,6 @@ AND
     (expiry_date IS NULL OR expiry_date > CURRENT_TIMESTAMP)
 `;
 
-
-
 router.get("/home", (req, res) => {
     res.render("../views/user/home");
 });
@@ -38,15 +36,9 @@ router.get("/sifre", (req, res) => {
 });
 
 router.get("/duyurular", async (req, res) => {
-    try {
-        const result = await db.query(announcement_sql);
-        res.render("../views/user/duyurular.ejs", { announcement: result.rows, });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Bir hata oluştu.');
-    }
+    res.render("../views/user/duyurular.ejs");
 });
+
 router.get("/duyurular/data", async (req, res) => {
     try {
         const result = await db.query(announcement_sql);

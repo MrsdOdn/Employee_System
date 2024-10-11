@@ -98,6 +98,29 @@
           },
         },
       ],
+      dom: "Blfrtip", // Butonlar ve filtreler için yapılandırma
+      buttons: [
+        {
+          extend: "colvis",
+          text: '<i class="fa fa-eye" data-toggle="tooltip" title="Kolonları Göster/Gizle"></i>',
+        },
+        {
+          extend: "excelHtml5",
+          text: '<i class="fa fa-file-excel-o" data-toggle="tooltip" data-original-title="Excel\'e Aktar"></i>',
+          title: "Çalışanlar " + moment(new Date()).format("DD-MM-YYYY"),
+          exportOptions: {
+            columns: ":visible",
+          },
+        },
+        {
+          extend: "print",
+          text: '<i class="fa fa-print" data-toggle="tooltip" data-original-title="Yazdır"></i>',
+          title: "Çalışanlar " + moment(new Date()).format("DD-MM-YYYY"),
+          exportOptions: {
+            columns: ":visible",
+          },
+        },
+      ],
 
       fixedColumns: {
         leftColumns: 1,
@@ -112,7 +135,7 @@
         [10, 25, 50, "All"],
       ],
       language: {
-        lengthMenu: "Sayfa başına _MENU_ kayıt göster",
+        lengthMenu: " _MENU_ Sayfa başı kayıt Sayısı",
         zeroRecords: "Kayıt bulunamadı",
         info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
         infoEmpty: "Kayıt yok",
@@ -146,12 +169,6 @@
           });
       },
     });
-
-    //tıklanan satırın bilgilerini alır. bu özelliği kullanarak silme ve benzeri işlemleri yapacağız.
-    table.on("click", "tbody tr", function () {
-      let data = table.row(this).data();
-
-      alert("You clicked on " + data[0] + "'s row");
-    });
+    $('[data-toggle="tooltip"]').tooltip();
   });
 </script>

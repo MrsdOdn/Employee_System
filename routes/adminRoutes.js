@@ -92,14 +92,8 @@ LEFT JOIN
     announcement_categories ac ON acr.category_id = ac.id
 LEFT JOIN 
     employees e ON a.published_by = e.employee_id
-WHERE 
-    a.status = 'active' 
-AND 
-    a.publish_date <= CURRENT_TIMESTAMP 
-AND 
-    (expiry_date IS NULL OR expiry_date > CURRENT_TIMESTAMP)
 `;
-const announcement_category_sql = `SELECT * FROM announcement_categories`
+const announcement_category_sql = `SELECT * FROM announcement_categories`;
 
 router.get("/", (req, res) => {
     res.render("admin/admin.ejs");
@@ -119,33 +113,27 @@ router.get("/duyurular/data", async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.post('/duyurular/data', async (req, res) => {
-    const { title, content, published_by, publish_date, expiry_date, status, created_at, category_id } = req.body;
-    if (!published_by) {
-        console.error('published_by alanı tanımsız!');
-        return res.status(400).json({ error: 'published_by alanı gerekli' });
-    }
+router.get("/duyurular/data/:id", async (req, res) => {
+    const id = req.params.id; // URL'den alınan id
+    const a_id = `WHERE a.id = $1`;
+    // Duyuruya özel SQL sorgusu
+    const announcementById_sql = announcement_sql + a_id;
+
     try {
-        const result = await db.query(
-            `INSERT INTO announcements (title, content, published_by, publish_date, expiry_date, status, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-            [title, content, published_by, publish_date, expiry_date, status, created_at]
-        );
-
-        const announcementId = result.rows[0].id;
-
-        await db.query(
-            `INSERT INTO announcement_category_relations (announcement_id, category_id)
-             VALUES ($1, $2)`,
-            [announcementId, category_id]
-        );
-
-        res.status(201).json({ id: announcementId });
+        const result = await db.query(announcementById_sql, [id]); // id'yi parametre olarak geç
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]); // Duyuru bulunduysa, ilk sonucu döndür
+        } else {
+            res.status(404).json({ error: 'Duyuru bulunamadı.' }); // Eğer duyuru yoksa 404 döndür
+        }
     } catch (error) {
-        console.error('Veri ekleme hatası:', error);
-        res.status(500).json({ error: 'Veri eklenirken bir hata oluştu' });
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
+
 router.get("/duyurular/category/data", async (req, res) => {
     try {
         const result = await db.query(announcement_category_sql);
@@ -212,4 +200,63 @@ router.get("/calisanlar/body/data", async (req, res) => {
 router.get('/calisanlar', async (req, res) => {
     res.render('admin/calisanlar.ejs');
 });
+
+
+router.post('/duyurular/data', async (req, res) => {
+    console.log('Sunucuya Gelen Veriler:', req.body);
+    const { title, content, published_by, publish_date, expiry_date, status, created_at, category_id } = req.body;
+    if (!published_by) {
+        console.error('published_by alanı tanımsız!');
+        return res.status(400).json({ error: 'published_by alanı gerekli' });
+    }
+    try {
+        const result = await db.query(
+            `INSERT INTO announcements (title, content, published_by, publish_date, expiry_date, status, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [title, content, published_by, publish_date, expiry_date, status, created_at]
+        );
+
+        const announcementId = result.rows[0].id;
+
+        if (category_id) {
+            await db.query(
+                `INSERT INTO announcement_category_relations (announcement_id, category_id)
+                 VALUES ($1, $2)`,
+                [announcementId, category_id]
+            );
+        }
+
+        res.status(201).json({ id: announcementId });
+    } catch (error) {
+        console.error('Veri ekleme hatası:', error);
+        res.status(500).json({ error: 'Veri eklenirken bir hata oluştu' });
+    }
+});
+
+
+router.delete('/duyurular/data/:id', async (req, res) => {
+    const id = req.params.id;
+
+    // ID'nin geçerli bir sayı olup olmadığını kontrol et
+    if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: 'Geçersiz ID.' });
+    }
+
+    try {
+        //taplolar arasında foreign key ilişkisi olduğu için diğer taployu da silmem gerekti. 
+        await db.query(`DELETE FROM announcement_category_relations WHERE announcement_id = $1`, [id]);
+        const result = await db.query(`DELETE FROM announcements WHERE id = $1`, [id]);
+
+        if (result.rowCount > 0) {
+            return res.status(200).json({ message: 'Duyuru başarıyla silindi.' });
+        } else {
+            return res.status(404).json({ message: 'Duyuru bulunamadı.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
+    }
+});
+
+
 export default router;
