@@ -1,9 +1,5 @@
 <div class="container mb-3">
-  <table
-    id="contact_info"
-    class="display"
-    style="width: 100%"
-  >
+  <table id="contact_info" class="display" style="width: 100%">
     <thead>
       <tr>
         <th>Çalışan ID</th>
@@ -42,7 +38,7 @@
   $(document).ready(function () {
     var table = $("#contact_info").DataTable({
       ajax: {
-        url: "/admin/calisanlar/contact/data",
+        url: "/admin/api/calisanlar/contact",
         dataSrc: "",
       },
       columns: [
@@ -84,12 +80,12 @@
           },
         },
         {
-          data: "address_id",
+          data: "employee_id",
           render: function (data) {
-            return `<a href="/edit/address/${data}" class="btn btn-warning btn-sm">
-                    <ion-icon name="create-outline"></ion-icon></a>
-                    <a href="/delete/address/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
-                    <ion-icon name="trash"></ion-icon></a>`;
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/contact/${data}', '${data}')">
+                    <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
+                    <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/contact/${data}', ${data},'#contact_info')">
+                    <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
           },
         },
       ],
@@ -121,7 +117,7 @@
       },
       fixedHeader: true,
       scrollCollapse: true,
-      scrollY: "100vh",
+      searching: true,
       scrollX: true,
       lengthMenu: [
         [10, 25, 50, -1],

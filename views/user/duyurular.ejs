@@ -8,7 +8,7 @@
 <script>
   $(document).ready(function () {
     $.ajax({
-      url: "/admin/duyurular/data",
+      url: "/user/api/duyurular",
       method: "GET",
       success: function (data) {
         const announcementContainer = $("#announcementContainer");

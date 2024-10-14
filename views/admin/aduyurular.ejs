@@ -8,7 +8,7 @@
   Duyuru Ekle
 </button>
 
-<%- include('../partials/delete_confirm_modal.ejs') %>
+<%- include('../partials/announcement_edit.ejs') %>
 
 <div class="container mb-3">
     <table id="announcements-table" class="display" style="width: 100%">
@@ -137,7 +137,7 @@
   $(document).ready(function () {
     var table = $("#announcements-table").DataTable({
       ajax: {
-        url: "/admin/duyurular/data",
+        url: "/admin/api/duyurular",
         dataSrc: "",
       },
       columns: [
@@ -178,10 +178,10 @@
         {
           data: "id",
           render: function (data, type, row) {
-            return `<a href="/edit/${data}" class="btn btn-warning btn-sm">
-                    <ion-icon name="create-outline"></ion-icon>
-                    <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/duyurular/data/${data}', ${data})">
-                    <ion-icon name="trash"></ion-icon></a>`;
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/duyurular/${data}', '${data}')">
+                    <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
+                    <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/duyurular/${data}', ${data},'#announcements-table')">
+                    <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
           },
         },
       ],
@@ -193,7 +193,7 @@
         },
         {
           extend: "excelHtml5",
-          text: '<i class="fa fa-file-excel-o" data-toggle="tooltip" data-original-title="Excel\'e Aktar"></i>',
+          text: '<i class="fa fa-file-excel-o" data-toggle="tooltip" title="Excel\'e Aktar"></i>',
           title: "Çalışanlar " + moment(new Date()).format("DD-MM-YYYY"),
           exportOptions: {
             columns: ":visible",
@@ -213,7 +213,7 @@
       },
       fixedHeader: true,
       scrollCollapse: true,
-      scrollY: "100vh",
+      /* scrollY: "100vh", */
       scrollX: true,
       //sayfalama kısmındaki menü kısmını düzenlmeye yarar.
       lengthMenu: [
@@ -226,6 +226,7 @@
         info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
         infoEmpty: "Kayıt yok",
         infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        searching: true,
         search: "Ara:",
         paginate: {
           first: "İlk",
@@ -257,7 +258,7 @@
     });
 
     $.ajax({
-      url: '/admin/duyurular/category/data',
+      url: '/admin/api/category/duyurular',
       dataSrc: "",
       method: 'GET',
       success: function (data) {
@@ -271,7 +272,7 @@
         console.error("Kategoriler yüklenirken hata oluştu", err);
       }
     });
-    $('[data-toggle="tooltip"]').tooltip();
+   
     let employeeId;
     
     $.ajax({
@@ -286,7 +287,6 @@
         console.error('Hata:', textStatus, errorThrown);
     }
     });
-    
 
     $("#submitAnnouncement").on("click", function () {
       event.preventDefault(); // Varsayılan form gönderimini engelle
@@ -304,20 +304,24 @@
         
     $.ajax({
         type: "POST",
-        url: '/admin/duyurular/data',
+        url: '/admin/api/duyurular',
         contentType: "application/json",
         data: JSON.stringify(announcementData),
         success: function (data) {
-            alert("Duyuru başarıyla eklendi! ID: " + data.id);
+          $("#announcementId").text(data.id);
+          showToast("Duyuru Ekleme", "Duyuru başarıyla eklendi! ID: " + data.id);
 
-            $("#announcementModal").modal("hide");
-            $("#announcementForm")[0].reset();
+          $("#announcements-table").DataTable().ajax.reload(null, false);
+
+          $("#announcementModal").modal("hide");
+          $("#announcementForm")[0].reset();
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.error('Hata:', textStatus, errorThrown);
-            alert("Bir hata oluştu: " + jqXHR.responseText);
+            showToast("Bir hata oluştu: "," " + jqXHR.responseText);
         }
     });
-});
+}); 
+   $('[data-toggle="tooltip"]').tooltip();
   });
 </script>

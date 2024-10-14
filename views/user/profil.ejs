@@ -1,1 +1,177 @@
-<h1>Profil Sayfası</h1>
+<nav class="mb-2">
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <button
+      class="nav-link active"
+      id="nav-user-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-user"
+      type="button"
+      role="tab"
+      aria-controls="nav-user"
+      aria-selected="true"
+    >
+      Kullanıcı Bilgileri
+      <ion-icon class="tab-icon" name="person"></ion-icon>
+    </button>
+    <button
+      class="nav-link"
+      id="nav-job-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-job"
+      type="button"
+      role="tab"
+      aria-controls="nav-job"
+      aria-selected="false"
+    >
+      İş Bilgileri
+      <ion-icon class="tab-icon" name="bag-remove"></ion-icon>
+    </button>
+    <button
+      class="nav-link"
+      id="nav-personal-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-personal"
+      type="button"
+      role="tab"
+      aria-controls="nav-personal"
+      aria-selected="false"
+    >
+      Kişisel Bilgiler
+      <ion-icon class="tab-icon" name="id-card"></ion-icon>
+    </button>
+    <button
+      class="nav-link"
+      id="nav-contact-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-contact"
+      type="button"
+      role="tab"
+      aria-controls="nav-contact"
+      aria-selected="false"
+    >
+      İletişim Bilgileri
+      <ion-icon class="tab-icon" name="call"></ion-icon>
+    </button>
+    <button
+      class="nav-link"
+      id="nav-education-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-education"
+      type="button"
+      role="tab"
+      aria-controls="nav-education"
+      aria-selected="false"
+    >
+      Eğitim Bilgiler
+      <ion-icon class="tab-icon" name="school"></ion-icon>
+    </button>
+    <button
+      class="nav-link"
+      id="nav-body-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#nav-body"
+      type="button"
+      role="tab"
+      aria-controls="nav-body"
+      aria-selected="false"
+    >
+      Beden Ölçüleri
+      <ion-icon class="tab-icon" name="body"></ion-icon>
+    </button>
+  </div>
+</nav>
+
+<div
+  class="tab-pane fade show active"
+  id="nav-user"
+  role="tabpanel"
+  aria-labelledby="nav-user-tab"
+  tabindex="0"
+>
+  <%- include("./information_partials/user.ejs") %> <%-
+  include("../partials/image_upload.ejs") %>
+</div>
+<div
+  class="tab-pane fade"
+  id="nav-job"
+  role="tabpanel"
+  aria-labelledby="nav-job-tab"
+  tabindex="0"
+></div>
+<div
+  class="tab-pane fade"
+  id="nav-personal"
+  role="tabpanel"
+  aria-labelledby="nav-personal-tab"
+  tabindex="0"
+></div>
+<div
+  class="tab-pane fade"
+  id="nav-contact"
+  role="tabpanel"
+  aria-labelledby="nav-contact-tab"
+  tabindex="0"
+></div>
+
+<div
+  class="tab-pane fade"
+  id="nav-education"
+  role="tabpanel"
+  aria-labelledby="nav-education-tab"
+  tabindex="0"
+></div>
+<div
+  class="tab-pane fade"
+  id="nav-body"
+  role="tabpanel"
+  aria-labelledby="nav-body-tab"
+  tabindex="0"
+></div>
+
+<script>
+  async function user() {
+    try {
+      const response = await $.ajax({
+        url: "/api/user",
+        method: "GET",
+        dataType: "json",
+      });
+
+      $("#employeeId").text(`Employee ID: ${response.employee_id}`);
+      return response.employee_id;
+    } catch (error) {
+      console.error("Hata:", error);
+      return null;
+    }
+  }
+  $(document).ready(function () {
+    const $tabButtons = $(".nav-link");
+    const $tabIcons = $(".tab-icon");
+
+    const selectedTab = localStorage.getItem("selectedTab") || "#nav-user";
+    $(".tab-pane").removeClass("show active").hide();
+    $(selectedTab).addClass("show active").fadeIn();
+
+    const updateActiveTab = (target) => {
+      $tabButtons.removeClass("active");
+      $tabIcons.removeClass("tab-icon-active");
+
+      const $activeButton = $tabButtons.filter(`[data-bs-target="${target}"]`);
+      $activeButton.addClass("active");
+      $activeButton.find(".tab-icon").addClass("tab-icon-active");
+    };
+
+    updateActiveTab(selectedTab);
+
+    $tabButtons.on("click", function () {
+      const target = $(this).data("bs-target");
+
+      $(".tab-pane").removeClass("show active").hide();
+      $(target).addClass("show active").fadeIn();
+
+      localStorage.setItem("selectedTab", target);
+
+      updateActiveTab(target);
+    });
+  });
+</script>

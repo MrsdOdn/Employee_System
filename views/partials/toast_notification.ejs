@@ -1,0 +1,48 @@
+<div
+  id="toast"
+  class="toast black-backend"
+  role="alert"
+  aria-live="assertive"
+  aria-atomic="true"
+  style="position: fixed; top: 20px; right: 20px; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;"
+>
+  <div class="toast-header">
+    <strong class="mr-auto" id="toastTitle">Bildirim</strong>
+    <button
+      type="button"
+      class="ml-2 mb-1 close"
+      data-dismiss="toast"
+      aria-label="Close"
+      onclick="hideToast()"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="toast-body" id="toastBody">Mesaj burada görüntülenecek.</div>
+</div>
+
+<script>
+  function showToast(title, message) {
+    $("#toastTitle").text(title);
+    $("#toastBody").text(message);
+    $("#toast").css({
+      "opacity": 1,
+      "visibility": "visible",
+      "z-index": 9999
+    }).addClass("show");
+
+    setTimeout(hideToast, 3000);
+  }
+
+  function hideToast() {
+    $("#toast").css({
+      "opacity": 0,
+      "visibility": "hidden",
+      "z-index": 999
+    });
+
+    setTimeout(function() {
+      $("#toast").removeClass("show");
+    }, 500);
+  }
+</script>

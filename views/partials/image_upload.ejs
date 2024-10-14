@@ -1,0 +1,142 @@
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="imageUploadModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="imageUploadModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content black-backend">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imageUploadModalLabel">
+          Profile Image Upload
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="font-italic text-white text-center">
+          Yüklenen görsel alttaki kutunun içinde gösterilecektir.
+        </p>
+        <div class="image-area mt-4">
+          <img
+            id="imageResult"
+            src="#"
+            alt=""
+            class="img-fluid rounded shadow-sm mx-auto d-block"
+          />
+        </div>
+
+        <div class="row py-4">
+          <div class="col-lg-12">
+            <div
+              class="input-group mb-3 px-2 py-2 rounded-pill bg-white shadow-sm"
+            >
+              <input
+                id="upload"
+                type="file"
+                onchange="readURL(this);"
+                class="form-control border-0"
+              />
+              <label
+                id="upload-label"
+                for="upload"
+                class="font-weight-light text-muted"
+                >Choose file</label
+              >
+              <div class="input-group-append">
+                <label for="upload" class="btn btn-light m-0 rounded-pill px-4">
+                  <i class="fa fa-cloud-upload mr-2 text-muted"></i
+                  ><small class="text-uppercase font-weight-bold text-muted"
+                    >Choose file</small
+                  ></label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            İptal
+          </button>
+          <button type="button" class="btn btn-primary" id="editImage">
+            Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    // Yüklenen resmi göster
+    $("#upload").change(function () {
+      var input = this;
+
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+          $("#imageResult").attr("src", e.target.result);
+        };
+
+        reader.readAsDataURL(input.files[0]);
+
+        var fileName = input.files[0].name;
+        $("#upload-label").text("File name: " + fileName);
+      }
+    });
+
+    $("#imageUploadModal").on("hidden.bs.modal", function () {
+      $("#imageResult").attr("src", "#");
+      $("#upload").val("");
+      $("#upload-label").text("Choose file");
+    });
+
+    // Kaydet butonuna tıklanınca onay mesajı
+    $("#editImage").click(async function (event) {
+      event.preventDefault();
+
+      const file = $("#upload")[0].files[0];
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      formData.append("firstName", $("#firstName").val());
+      formData.append("lastName", $("#lastName").val());
+
+      try {
+        const userId = await user();
+        const url = "/api/user/" + userId;
+
+        const response = await $.ajax({
+          type: "PATCH",
+          url: url,
+          data: formData,
+          processData: false,
+          contentType: false,
+        });
+
+        showToast(
+          "Profil Resmi",
+          "Başarı ile değiştirildi! ID: " + response.id
+        );
+        $("#imageUploadModal").modal("hide");
+      } catch (jqXHR) {
+        console.error("Hata:", jqXHR.status, jqXHR.statusText);
+        showToast(
+          "Bir hata oluştu: ",
+          jqXHR.responseJSON.message || "Bilinmeyen bir hata"
+        );
+      }
+    });
+  });
+</script>

@@ -1,0 +1,197 @@
+<div
+  class="modal fade"
+  id="editAnnouncementModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="editAnnouncementModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content black-backend">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editAnnouncementModalLabel">
+          Duyuru Güncelleme
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editAnnouncementForm">
+          <div class="form-group">
+            <label for="editAnnouncementTitle">Başlık</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editAnnouncementTitle"
+              placeholder="Duyuru başlığını girin"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="editAnnouncementContent">Duyuru İçeriği</label>
+            <textarea
+              class="form-control"
+              id="editAnnouncementContent"
+              rows="4"
+              placeholder="Duyuru içeriğini girin"
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editAnnouncementCategory">Kategori</label>
+            <select class="form-control" id="editAnnouncementCategory" required>
+              <option value="">Kategori Seçin</option>
+              <!-- Kategoriler dinamik olarak yüklenecek -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editAnnouncementStatusToggle">Durum</label>
+            <div class="custom-control custom-switch">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="editAnnouncementStatusToggle"
+                checked
+              />
+              <label
+                class="custom-control-label"
+                for="editAnnouncementStatusToggle"
+                >Aktif/Pasif</label
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editPublishDate">Yayınlanacağı Tarihi</label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              id="editPublishDate"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="editExpirationDate">Son Geçerlilik Tarihi</label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              id="editExpirationDate"
+              required
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Kapat
+        </button>
+        <button type="button" class="btn btn-primary" id="editAnnouncement">
+          Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let editUrl = "";
+  let editId = "";
+
+  function edit(url, id) {
+    editUrl = url;
+    editId = id;
+
+    // Kategori verilerini yükle
+    $.ajax({
+      url: "/admin/api/category/duyurular",
+      method: "GET",
+      success: function (data) {
+        const $categorySelect = $("#editAnnouncementCategory");
+        $categorySelect.empty(); // Önceki seçenekleri temizle
+        $categorySelect.append('<option value="">Kategori Seçin</option>'); // Varsayılan seçenek
+
+        data.forEach((category) => {
+          const option = `<option value="${category.id}">${category.name}</option>`;
+          $categorySelect.append(option);
+        });
+      },
+      error: function (err) {
+        console.error("Kategoriler yüklenirken hata oluştu", err);
+      },
+    });
+
+    // Verileri yükle
+    $.ajax({
+      url: editUrl,
+      method: "GET",
+      success: function (announcement) {
+        // Duyuru verilerini modal içine yükle
+        $("#editAnnouncementTitle").val(announcement.title);
+        $("#editAnnouncementContent").val(announcement.content);
+        $("#editPublishDate").val(announcement.publish_date.slice(0, 16));
+        $("#editExpirationDate").val(announcement.expiry_date.slice(0, 16));
+        $("#editAnnouncementStatusToggle").prop(
+          "checked",
+          announcement.status === "active"
+        );
+        $("#editAnnouncementCategory").val(announcement.category_id);
+      },
+      error: function (err) {
+        console.error("Duyuru verileri yüklenirken hata oluştu", err);
+      },
+    });
+
+    $("#editAnnouncementModal").modal("show");
+  }
+
+  $(document).ready(function () {
+    $("#editAnnouncement").on("click", function (event) {
+      event.preventDefault(); // Varsayılan form gönderimini engelle
+
+      // Form doğrulaması
+      if (
+        !$("#editAnnouncementTitle").val() ||
+        !$("#editAnnouncementContent").val()
+      ) {
+        alert("Lütfen tüm alanları doldurun.");
+        return;
+      }
+
+      const announcementData = {
+        title: $("#editAnnouncementTitle").val(),
+        content: $("#editAnnouncementContent").val(),
+        publish_date: $("#editPublishDate").val(),
+        expiry_date: $("#editExpirationDate").val(),
+        status: $("#editAnnouncementStatusToggle").is(":checked")
+          ? "active"
+          : "inactive",
+        category_id: $("#editAnnouncementCategory").val(),
+      };
+
+      console.log("Gönderilecek veriler:", announcementData);
+
+      $.ajax({
+        type: "PATCH",
+        url: editUrl,
+        contentType: "application/json",
+        data: JSON.stringify(announcementData),
+        success: function (response) {
+          showToast("Duyuru", "Başarı ile değiştirildi! ID: " + response.id);
+          $("#announcements-table").DataTable().ajax.reload(null, false);
+          $("#editAnnouncementModal").modal("hide");
+          $("#editAnnouncementForm")[0].reset();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("Hata:", textStatus, errorThrown);
+          showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+        },
+      });
+    });
+  });
+</script>

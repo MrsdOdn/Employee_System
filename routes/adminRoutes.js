@@ -45,7 +45,7 @@ FROM
 LEFT JOIN 
     employees e 
 ON 
-    epi.employee_id = e.employee_id;
+    epi.employee_id = e.employee_id
 `;
 const contact_info_sql = `SELECT
     ec.*,
@@ -102,9 +102,8 @@ router.get("/", (req, res) => {
 router.get("/duyurular", (req, res) => {
     res.render("admin/aduyurular.ejs");
 });
-
 // Dinamik veriyi JSON formatında döndüren route
-router.get("/duyurular/data", async (req, res) => {
+router.get("/api/duyurular", async (req, res) => {
     try {
         const result = await db.query(announcement_sql);
         res.json(result.rows);
@@ -113,7 +112,7 @@ router.get("/duyurular/data", async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.get("/duyurular/data/:id", async (req, res) => {
+router.get("/api/duyurular/:id", async (req, res) => {
     const id = req.params.id; // URL'den alınan id
     const a_id = `WHERE a.id = $1`;
     // Duyuruya özel SQL sorgusu
@@ -131,78 +130,7 @@ router.get("/duyurular/data/:id", async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-
-
-router.get("/duyurular/category/data", async (req, res) => {
-    try {
-        const result = await db.query(announcement_category_sql);
-        res.json(result.rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-router.get("/calisanlar/user/data", async (req, res) => {
-    try {
-        const result = await db.query(user_info_sql);
-        res.json(result.rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-router.get("/calisanlar/job/data", async (req, res) => {
-    try {
-        const result = await db.query(job_info_sql);
-        res.json(result.rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-}); router.get("/calisanlar/personal/data", async (req, res) => {
-    try {
-        const result = await db.query(personal_info_sql);
-        res.json(result.rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-router.get("/calisanlar/contact/data", async (req, res) => {
-    try {
-        const result = await db.query(contact_info_sql);
-        res.json(result.rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-router.get("/calisanlar/education/data", async (req, res) => {
-    try {
-        const result = await db.query(education_info_sql);
-        res.json(result.rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-router.get("/calisanlar/body/data", async (req, res) => {
-    try {
-        const result = await db.query(body_info_sql);
-        res.json(result.rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-router.get('/calisanlar', async (req, res) => {
-    res.render('admin/calisanlar.ejs');
-});
-
-
-router.post('/duyurular/data', async (req, res) => {
+router.post('/api/duyurular', async (req, res) => {
     console.log('Sunucuya Gelen Veriler:', req.body);
     const { title, content, published_by, publish_date, expiry_date, status, created_at, category_id } = req.body;
     if (!published_by) {
@@ -232,16 +160,38 @@ router.post('/duyurular/data', async (req, res) => {
         res.status(500).json({ error: 'Veri eklenirken bir hata oluştu' });
     }
 });
+router.patch("/api/duyurular/:id", async (req, res) => {
+    console.log('Sunucuya Gelen Veriler:', req.body);
+    const { title, content, publish_date, expiry_date, status, category_id } = req.body;
+    const { id } = req.params;
 
+    try {
+        const result = await db.query(
+            `UPDATE announcements
+             SET title=$1, content=$2, publish_date=$3, expiry_date=$4, status=$5 
+             WHERE id = $6`,
+            [title, content, publish_date, expiry_date, status, id]
+        );
 
-router.delete('/duyurular/data/:id', async (req, res) => {
+        if (category_id) {
+            await db.query(
+                `UPDATE announcement_category_relations
+                 SET category_id = $1 WHERE announcement_id = $2`,
+                [category_id, id]
+            );
+        }
+
+        res.status(200).json({ id });
+    } catch (error) {
+        console.error('Veri değiştirme hatası:', error);
+        res.status(500).json({ error: 'Veri değiştirilirken bir hata oluştu' });
+    }
+});
+router.delete('/api/duyurular/:id', async (req, res) => {
     const id = req.params.id;
-
-    // ID'nin geçerli bir sayı olup olmadığını kontrol et
     if (isNaN(id) || id <= 0) {
         return res.status(400).json({ message: 'Geçersiz ID.' });
     }
-
     try {
         //taplolar arasında foreign key ilişkisi olduğu için diğer taployu da silmem gerekti. 
         await db.query(`DELETE FROM announcement_category_relations WHERE announcement_id = $1`, [id]);
@@ -257,6 +207,852 @@ router.delete('/duyurular/data/:id', async (req, res) => {
         return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
     }
 });
+
+router.get("/api/category/duyurular", async (req, res) => {
+    try {
+        const result = await db.query(announcement_category_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.get('/calisanlar', async (req, res) => {
+    res.render('admin/calisanlar.ejs');
+});
+
+router.get("/api/calisanlar/user", async (req, res) => {
+    try {
+        const result = await db.query(user_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisanlar/user/:id", async (req, res) => {
+    const id = req.params.id;
+    const e_id = ` WHERE employees.employee_id = $1`;
+    const userById_sql = user_info_sql + e_id;
+
+    try {
+        const result = await db.query(userById_sql, [id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.patch("/api/calisanlar/user/:id", async (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, email, phone, password, profileImage } = req.body;
+    const updates = [];
+    const values = [];
+
+    if (firstName) {
+        updates.push("first_name = $" + (updates.length + 1));
+        values.push(firstName);
+    }
+
+    if (lastName) {
+        updates.push("last_name = $" + (updates.length + 1));
+        values.push(lastName);
+    }
+
+    if (email) {
+        updates.push("email = $" + (updates.length + 1));
+        values.push(email);
+    }
+
+    if (phone) {
+        updates.push("phone_number = $" + (updates.length + 1));
+        values.push(phone);
+    }
+
+    if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        updates.push("password_hash = $" + (updates.length + 1));
+        values.push(hashedPassword);
+    }
+    if (profileImage) {
+        updates.push("profile_image = $" + (updates.length + 1));
+        values.push(profileImage);
+    }
+    if (updates.length === 0) {
+        return res.status(400).json({ error: "Güncellenecek bir alan bulunamadı" });
+    }
+
+    values.push(id);
+
+    const updateQuery = `
+        UPDATE employees 
+        SET ${updates.join(", ")} 
+        WHERE employee_id = $${values.length}
+        RETURNING *;
+    `;
+
+    try {
+        const result = await db.query(updateQuery, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Çalışan bulunamadı" });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("Güncelleme hatası:", error);
+        res.status(500).json({ error: "Veritabanı güncelleme sırasında bir hata oluştu" });
+    }
+});
+router.delete('/api/calisanlar/user/:id', async (req, res) => {
+    const id = req.params.id;
+    if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: 'Geçersiz ID.' });
+    }
+    try {
+        const result = await db.query(`DELETE FROM employees WHERE employee_id = $1`, [id]);
+
+        if (result.rowCount > 0) {
+            return res.status(200).json({ message: 'Kişi başarıyla silindi.' });
+        } else {
+            return res.status(404).json({ message: 'Kişi bulunamadı.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
+    }
+});
+
+router.get("/api/calisanlar/job", async (req, res) => {
+    try {
+        const result = await db.query(job_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisanlar/job/:id", async (req, res) => {
+    const id = req.params.id;
+    const e_id = ` WHERE e.employee_id = $1`;
+    const jobById_sql = job_info_sql + e_id;
+
+    try {
+        const result = await db.query(jobById_sql, [id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Kullanıcı iş bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.delete('/api/calisanlar/job/:id', async (req, res) => {
+    const id = req.params.id;
+    if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: 'Geçersiz ID.' });
+    }
+    try {
+        const result = await db.query(`DELETE FROM Employee_Positions WHERE employee_id = $1`, [id]);
+
+        if (result.rowCount > 0) {
+            return res.status(200).json({ message: 'Kişi iş bilgisi başarıyla silindi.' });
+        } else {
+            return res.status(404).json({ message: 'Kişi iş bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
+    }
+});
+router.patch("/api/calisanlar/job/:id", async (req, res) => {
+    const id = req.params.id;
+    const {
+        title,
+        task,
+        department,
+        division,
+        job_description,
+        employee_type,
+        employment_start_date,
+        termination_date,
+        group_id
+    } = req.body;
+
+    const fields = [];
+    const values = [];
+
+    if (title) {
+        fields.push("title = $1");
+        values.push(title);
+    }
+    if (task) {
+        fields.push("task = $" + (values.length + 1));
+        values.push(task);
+    }
+    if (department) {
+        fields.push("department = $" + (values.length + 1));
+        values.push(department);
+    }
+    if (division) {
+        fields.push("division = $" + (values.length + 1));
+        values.push(division);
+    }
+    if (job_description) {
+        fields.push("job_description = $" + (values.length + 1));
+        values.push(job_description);
+    }
+    if (employee_type) {
+        fields.push("employee_type = $" + (values.length + 1));
+        values.push(employee_type);
+    }
+    if (employment_start_date) {
+        fields.push("employment_start_date = $" + (values.length + 1));
+        values.push(employment_start_date);
+    }
+    if (termination_date) {
+        fields.push("termination_date = $" + (values.length + 1));
+        values.push(termination_date);
+    }
+    if (group_id) {
+        fields.push("group_id = $" + (values.length + 1));
+        values.push(group_id);
+    }
+
+    if (fields.length === 0) {
+        return res.status(400).json({ error: "Güncellenecek bir alan bulunamadı." });
+    }
+    const query = `
+        UPDATE Employee_Positions 
+        SET ${fields.join(", ")}
+        WHERE employee_id = $${values.length + 1}
+        RETURNING *;
+    `;
+    values.push(id);
+
+    try {
+        const result = await db.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Çalışan bulunamadı." });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("Güncelleme hatası:", error);
+        res.status(500).json({ error: "Veri güncellenirken bir hata oluştu." });
+    }
+});
+router.post("/api/calisanlar/job", async (req, res) => {
+    const {
+        employee_id,
+        title,
+        task,
+        department,
+        division,
+        job_description,
+        employee_type,
+        employment_start_date,
+        termination_date,
+        group_id
+    } = req.body;
+
+    if (!employee_id || !title || !task || !department) {
+        return res.status(400).json({ error: "Çalışan ID'si, title, task ve department alanları zorunludur." });
+    }
+
+    try {
+        const result = await db.query(
+            `INSERT INTO Employee_Positions (
+                employee_id, title, task, department, division, job_description, employee_type, 
+                employment_start_date, termination_date, group_id
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+            [
+                employee_id, title, task, department, division, job_description, employee_type,
+                employment_start_date, termination_date, group_id
+            ]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("Veri ekleme hatası:", error);
+        res.status(500).json({ error: "Veri eklenirken bir hata oluştu." });
+    }
+});
+
+
+
+router.get("/api/calisanlar/personal", async (req, res) => {
+    try {
+        const result = await db.query(personal_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisanlar/personal/:id", async (req, res) => {
+    const id = req.params.id;
+    const personalById_sql = personal_info_sql + ' WHERE e.employee_id = $1';
+
+    try {
+        const result = await db.query(personalById_sql, [id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Kullanıcı kişisel bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.delete('/api/calisanlar/personal/:id', async (req, res) => {
+    const id = req.params.id;
+    if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: 'Geçersiz ID.' });
+    }
+    try {
+        const result = await db.query(`DELETE FROM Employee_Personal_Information WHERE employee_id = $1`, [id]);
+
+        if (result.rowCount > 0) {
+            return res.status(200).json({ message: 'Kişi bilgisi başarıyla silindi.' });
+        } else {
+            return res.status(404).json({ message: 'Kişi bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
+    }
+});
+router.patch("/api/calisanlar/personal/:id", async (req, res) => {
+    const id = req.params.id;
+    const {
+        birth_date,
+        gender,
+        nationality,
+        marital_status,
+        blood_type,
+        mother_name,
+        father_name,
+        military_status,
+        education_level,
+        birth_place,
+        registration_number
+    } = req.body;
+
+    const fields = [];
+    const values = [];
+
+    if (birth_date) {
+        fields.push("birth_date = $1");
+        values.push(birth_date);
+    }
+    if (gender) {
+        fields.push("gender = $" + (values.length + 1));
+        values.push(gender);
+    }
+    if (nationality) {
+        fields.push("nationality = $" + (values.length + 1));
+        values.push(nationality);
+    }
+    if (marital_status) {
+        fields.push("marital_status = $" + (values.length + 1));
+        values.push(marital_status);
+    }
+    if (blood_type) {
+        fields.push("blood_type = $" + (values.length + 1));
+        values.push(blood_type);
+    }
+    if (mother_name) {
+        fields.push("mother_name = $" + (values.length + 1));
+        values.push(mother_name);
+    }
+    if (father_name) {
+        fields.push("father_name = $" + (values.length + 1));
+        values.push(father_name);
+    }
+    if (military_status) {
+        fields.push("military_status = $" + (values.length + 1));
+        values.push(military_status);
+    }
+    if (education_level) {
+        fields.push("education_level = $" + (values.length + 1));
+        values.push(education_level);
+    }
+    if (birth_place) {
+        fields.push("birth_place = $" + (values.length + 1));
+        values.push(birth_place);
+    }
+    if (registration_number) {
+        fields.push("registration_number = $" + (values.length + 1));
+        values.push(registration_number);
+    }
+
+    if (fields.length === 0) {
+        return res.status(400).json({ error: "Güncellenecek bir alan bulunamadı." });
+    }
+
+    const query = `
+        UPDATE Employee_Personal_Information 
+        SET ${fields.join(", ")}
+        WHERE employee_id = $${values.length + 1}
+        RETURNING *;
+    `;
+    values.push(id);
+
+    try {
+        const result = await db.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Çalışan bulunamadı." });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("Güncelleme hatası:", error);
+        res.status(500).json({ error: "Veri güncellenirken bir hata oluştu." });
+    }
+});
+router.post("/api/calisanlar/personal", async (req, res) => {
+    const {
+        employee_id,
+        birth_date,
+        gender,
+        nationality,
+        marital_status,
+        blood_type,
+        mother_name,
+        father_name,
+        military_status,
+        education_level,
+        birth_place,
+        registration_number
+    } = req.body;
+
+    if (!employee_id) {
+        return res.status(400).json({ error: "Çalışan ID'si gerekli." });
+    }
+
+    try {
+        const result = await db.query(
+            `INSERT INTO Employee_Personal_Information (
+                employee_id, birth_date, gender, nationality, marital_status, blood_type, 
+                mother_name, father_name, military_status, education_level, birth_place, registration_number
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+            [
+                employee_id, birth_date, gender, nationality, marital_status, blood_type,
+                mother_name, father_name, military_status, education_level, birth_place, registration_number
+            ]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("Veri ekleme hatası:", error);
+        res.status(500).json({ error: "Veri eklenirken bir hata oluştu." });
+    }
+});
+
+
+
+router.get("/api/calisanlar/contact", async (req, res) => {
+    try {
+        const result = await db.query(contact_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisanlar/contact/:id", async (req, res) => {
+    const id = req.params.id;
+    const contactById_sql = contact_info_sql + ' WHERE e.employee_id = $1';
+
+    try {
+        const result = await db.query(contactById_sql, [id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Kullanıcı iletişim bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.delete('/api/calisanlar/contact/:id', async (req, res) => {
+    const id = req.params.id;
+    if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: 'Geçersiz ID.' });
+    }
+    try {
+        const result = await db.query(`DELETE FROM Employee_Contacts WHERE employee_id = $1`, [id]);
+
+        if (result.rowCount > 0) {
+            return res.status(200).json({ message: 'Kişi iletişim bilgisi başarıyla silindi.' });
+        } else {
+            return res.status(404).json({ message: 'Kişi iletişim bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
+    }
+});
+router.post("/api/calisanlar/contact", async (req, res) => {
+    const {
+        employee_id,
+        address_type,
+        city,
+        state,
+        full_address,
+        emergency_contact
+    } = req.body;
+
+    if (!employee_id || !address_type || !full_address) {
+        return res.status(400).json({ error: "employee_id, address_type ve full_address alanları zorunludur." });
+    }
+    try {
+        const result = await db.query(
+            `INSERT INTO Employee_Contacts (
+                employee_id, address_type, city, state, full_address, emergency_contact
+            ) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [employee_id, address_type, city, state, full_address, emergency_contact]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("Veri ekleme hatası:", error);
+        res.status(500).json({ error: "Veri eklenirken bir hata oluştu." });
+    }
+});
+router.patch("/api/calisanlar/contact/:id", async (req, res) => {
+    const contactId = req.params.id;
+    const {
+        address_type,
+        city,
+        state,
+        full_address,
+        emergency_contact
+    } = req.body;
+
+    try {
+        const fields = [];
+        const values = [];
+
+        if (address_type) {
+            fields.push(`address_type = $${fields.length + 1}`);
+            values.push(address_type);
+        }
+        if (city) {
+            fields.push(`city = $${fields.length + 1}`);
+            values.push(city);
+        }
+        if (state) {
+            fields.push(`state = $${fields.length + 1}`);
+            values.push(state);
+        }
+        if (full_address) {
+            fields.push(`full_address = $${fields.length + 1}`);
+            values.push(full_address);
+        }
+        if (emergency_contact) {
+            fields.push(`emergency_contact = $${fields.length + 1}`);
+            values.push(emergency_contact);
+        }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ error: "Hiçbir alan güncellenmedi." });
+        }
+
+        const query = `UPDATE Employee_Contacts SET ${fields.join(", ")} WHERE address_id = $${fields.length + 1} RETURNING *`;
+        values.push(contactId);
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: "İletişim kaydı bulunamadı." });
+        }
+    } catch (error) {
+        console.error("Veri güncelleme hatası:", error);
+        res.status(500).json({ error: "Veri güncellenirken bir hata oluştu." });
+    }
+});
+
+
+
+
+router.get("/api/calisanlar/education", async (req, res) => {
+    try {
+        const result = await db.query(education_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisanlar/education/:id", async (req, res) => {
+    const id = req.params.id;
+    const educationById_sql = education_info_sql + ' WHERE e.employee_id = $1';
+
+    try {
+        const result = await db.query(educationById_sql, [id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Kullanıcı eğitim bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.delete('/api/calisanlar/education/:id', async (req, res) => {
+    const id = req.params.id;
+    if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: 'Geçersiz ID.' });
+    }
+    try {
+        const result = await db.query(`DELETE FROM Employee_Educations WHERE employee_id = $1`, [id]);
+
+        if (result.rowCount > 0) {
+            return res.status(200).json({ message: 'Kişi eğitim  bilgisi başarıyla silindi.' });
+        } else {
+            return res.status(404).json({ message: 'Kişi eğitim bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
+    }
+});
+router.post("/api/calisanlar/education", async (req, res) => {
+    const {
+        employee_id,
+        institution_type,
+        institution_name,
+        department,
+        start_year,
+        end_year,
+        degree
+    } = req.body;
+
+    if (!employee_id || !institution_type || !institution_name || !start_year || !degree) {
+        return res.status(400).json({ error: "Zorunlu alanlar eksik: employee_id, institution_type, institution_name, start_year, degree." });
+    }
+
+    try {
+        const result = await db.query(
+            `INSERT INTO Employee_Educations (
+                employee_id, institution_type, institution_name, department, start_year, end_year, degree
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+            [employee_id, institution_type, institution_name, department, start_year, end_year, degree]
+        );
+
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("Veri ekleme hatası:", error);
+        res.status(500).json({ error: "Eğitim bilgileri eklenirken bir hata oluştu." });
+    }
+});
+router.patch("/api/calisanlar/education/:id", async (req, res) => {
+    const educationId = req.params.id;
+    const {
+        institution_type,
+        institution_name,
+        department,
+        start_year,
+        end_year,
+        degree
+    } = req.body;
+
+    try {
+        const fields = [];
+        const values = [];
+        if (institution_type) {
+            fields.push(`institution_type = $${fields.length + 1}`);
+            values.push(institution_type);
+        }
+        if (institution_name) {
+            fields.push(`institution_name = $${fields.length + 1}`);
+            values.push(institution_name);
+        }
+        if (department) {
+            fields.push(`department = $${fields.length + 1}`);
+            values.push(department);
+        }
+        if (start_year) {
+            fields.push(`start_year = $${fields.length + 1}`);
+            values.push(start_year);
+        }
+        if (end_year) {
+            fields.push(`end_year = $${fields.length + 1}`);
+            values.push(end_year);
+        }
+        if (degree) {
+            fields.push(`degree = $${fields.length + 1}`);
+            values.push(degree);
+        }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ error: "Güncellenmesi gereken alan belirtilmedi." });
+        }
+
+        const query = `UPDATE Employee_Educations SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = $${fields.length + 1} RETURNING *`;
+        values.push(educationId);
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: "Eğitim kaydı bulunamadı." });
+        }
+    } catch (error) {
+        console.error("Veri güncelleme hatası:", error);
+        res.status(500).json({ error: "Eğitim bilgileri güncellenirken bir hata oluştu." });
+    }
+});
+
+
+
+router.get("/api/calisanlar/body", async (req, res) => {
+    try {
+        const result = await db.query(body_info_sql);
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisanlar/body/:id", async (req, res) => {
+    const id = req.params.id;
+    const bodyById_sql = body_info_sql + ' WHERE e.employee_id = $1';
+
+    try {
+        const result = await db.query(bodyById_sql, [id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Kullanıcı beden bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.delete('/api/calisanlar/body/:id', async (req, res) => {
+    const id = req.params.id;
+    if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: 'Geçersiz ID.' });
+    }
+    try {
+        const result = await db.query(`DELETE FROM Employee_Body_Measurements WHERE employee_id = $1`, [id]);
+
+        if (result.rowCount > 0) {
+            return res.status(200).json({ message: 'Kişi beden bilgisi başarıyla silindi.' });
+        } else {
+            return res.status(404).json({ message: 'Kişi beden bilgisi bulunamadı.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
+    }
+});
+router.post("/api/calisanlar/body", async (req, res) => {
+    const {
+        employee_id,
+        shoe_size,
+        clothing_size,
+        pant_size,
+        coat_size,
+        glove_size,
+        helmet_size
+    } = req.body;
+
+    if (!employee_id) {
+        return res.status(400).json({ error: "employee_id alanı gereklidir." });
+    }
+
+    try {
+        const result = await db.query(
+            `INSERT INTO Employee_Body_Measurements (
+                employee_id, shoe_size, clothing_size, pant_size, coat_size, glove_size, helmet_size
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+            [employee_id, shoe_size, clothing_size, pant_size, coat_size, glove_size, helmet_size]
+        );
+
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("Veri ekleme hatası:", error);
+        res.status(500).json({ error: "Beden ölçüleri eklenirken bir hata oluştu." });
+    }
+});
+router.patch("/api/calisanlar/body/:id", async (req, res) => {
+    const measurementId = req.params.id;
+    const {
+        shoe_size,
+        clothing_size,
+        pant_size,
+        coat_size,
+        glove_size,
+        helmet_size
+    } = req.body;
+
+    try {
+        const fields = [];
+        const values = [];
+
+        if (shoe_size) {
+            fields.push(`shoe_size = $${fields.length + 1}`);
+            values.push(shoe_size);
+        }
+        if (clothing_size) {
+            fields.push(`clothing_size = $${fields.length + 1}`);
+            values.push(clothing_size);
+        }
+        if (pant_size) {
+            fields.push(`pant_size = $${fields.length + 1}`);
+            values.push(pant_size);
+        }
+        if (coat_size) {
+            fields.push(`coat_size = $${fields.length + 1}`);
+            values.push(coat_size);
+        }
+        if (glove_size) {
+            fields.push(`glove_size = $${fields.length + 1}`);
+            values.push(glove_size);
+        }
+        if (helmet_size) {
+            fields.push(`helmet_size = $${fields.length + 1}`);
+            values.push(helmet_size);
+        }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ error: "Güncellenmesi gereken alan belirtilmedi." });
+        }
+
+        const query = `UPDATE Employee_Body_Measurements SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = $${fields.length + 1} RETURNING *`;
+        values.push(measurementId);
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: "Beden ölçüsü kaydı bulunamadı." });
+        }
+    } catch (error) {
+        console.error("Veri güncelleme hatası:", error);
+        res.status(500).json({ error: "Beden ölçüleri güncellenirken bir hata oluştu." });
+    }
+});
+
+
 
 
 export default router;

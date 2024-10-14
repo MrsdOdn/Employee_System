@@ -39,7 +39,7 @@
   $(document).ready(function () {
     var table = $("#job-info").DataTable({
       ajax: {
-        url: "/admin/calisanlar/job/data",
+        url: "/admin/api/calisanlar/job",
         dataSrc: "",
       },
       columns: [
@@ -82,10 +82,10 @@
         {
           data: "employee_id",
           render: function (data, type, row) {
-            return `<a href="/edit/${data}" class="btn btn-warning btn-sm">
-                    <ion-icon name="create-outline"></ion-icon>
-                    <a href="/delete/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
-                    <ion-icon name="trash"></ion-icon></a>`;
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/job/${data}', '${data}')">
+                    <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
+                    <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/job/${data}', ${data},'#job-info')">
+                    <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
           },
         },
       ],
@@ -117,7 +117,6 @@
       },
       fixedHeader: true,
       scrollCollapse: true,
-      scrollY: "100vh",
       scrollX: true,
       //sayfalama kısmındaki menü kısmını düzenlmeye yarar.
       lengthMenu: [
@@ -130,6 +129,7 @@
         info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
         infoEmpty: "Kayıt yok",
         infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        searching: true,
         search: "Ara:",
         paginate: {
           first: "İlk",

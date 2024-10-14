@@ -39,7 +39,7 @@
   $(document).ready(function () {
     var table = $("#body_info").DataTable({
       ajax: {
-        url: "/admin/calisanlar/body/data",
+        url: "/admin/api/calisanlar/body",
         dataSrc: "",
       },
       columns: [
@@ -87,14 +87,12 @@
           },
         },
         {
-          data: "id",
+          data: "employee_id",
           render: function (data) {
-            return `<a href="/edit/size/${data}" class="btn btn-warning btn-sm">
-                <ion-icon name="create-outline"></ion-icon>
-              </a>
-              <a href="/delete/size/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
-                <ion-icon name="trash"></ion-icon>
-              </a>`;
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/body/${data}', '${data}')">
+                    <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
+                    <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/body/${data}', ${data},'#body_info')">
+                    <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
           },
         },
       ],
@@ -127,7 +125,7 @@
       },
       fixedHeader: true,
       scrollCollapse: true,
-      scrollY: "100vh",
+      searching: true,
       scrollX: true,
       //sayfalama kısmındaki menü kısmını düzenlmeye yarar.
       lengthMenu: [

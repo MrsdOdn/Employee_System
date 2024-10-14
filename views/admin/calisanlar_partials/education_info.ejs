@@ -39,7 +39,7 @@
   $(document).ready(function () {
     var table = $("#education_info").DataTable({
       ajax: {
-        url: "/admin/calisanlar/education/data",
+        url: "/admin/api/calisanlar/education",
         dataSrc: "",
       },
       columns: [
@@ -87,14 +87,12 @@
           },
         },
         {
-          data: "id",
+          data: "employee_id",
           render: function (data) {
-            return `<a href="/edit/institution/${data}" class="btn btn-warning btn-sm">
-                <ion-icon name="create-outline"></ion-icon>
-              </a>
-              <a href="/delete/institution/${data}" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">
-                <ion-icon name="trash"></ion-icon>
-              </a>`;
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/education/${data}', '${data}')">
+                    <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
+                    <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/education/${data}', ${data},'#education_info')">
+                    <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
           },
         },
       ],
@@ -126,7 +124,7 @@
       },
       fixedHeader: true,
       scrollCollapse: true,
-      scrollY: "100vh",
+      searching: true,
       scrollX: true,
       lengthMenu: [
         [10, 25, 50, -1],

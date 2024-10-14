@@ -13,6 +13,7 @@ import userRoutes from "./routes/userRoutes.js";
 import moment from "moment";
 import cors from "cors";
 
+
 dotenv.config();
 const app = express();
 const port = 3000;
@@ -23,6 +24,7 @@ app.use(session({
     saveUninitialized: false
 }));
 
+
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -30,6 +32,7 @@ app.use(passport.session());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use((req, res, next) => {
     res.locals.messages = req.flash();// Hata mesajları
@@ -93,10 +96,13 @@ app.get("/logout", (req, res) => {
         res.redirect("/");
     });
 });
+
 app.use("/user", userRoutes);
 app.use('/admin', adminRoutes);
 app.use("/", authRoutes);
-
+app.use((req, res, next) => {
+    res.status(404).render('error404', { layout: false }); // views/404.ejs sayfasını render eder
+});
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}.`);

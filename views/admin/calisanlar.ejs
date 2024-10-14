@@ -170,22 +170,3 @@
     });
   });
 </script>
-
-<!-- 
-<script>
-  $(document).ready(function () {
-    const selectedTab = localStorage.getItem("selectedTab") || "#nav-user"; // Varsayılan olarak "Kullanıcı Bilgileri" sekmesi
-    $(".tab-pane").removeClass("show active").hide(); // Tüm sekmeleri gizle
-    $(selectedTab).addClass("show active").fadeIn(); // Seçilen sekmeyi göster
-
-    // Tab butonlarına tıklama olayını yönet
-    $(".nav-link").on("click", function () {
-      const target = $(this).data("bs-target");
-      localStorage.setItem("selectedTab", target); // Seçilen sekmeyi sakla
-
-      // Aktif sekmeyi göster
-      $(".tab-pane").removeClass("show active").hide(); // Tüm sekmeleri gizle
-      $(target).addClass("show active").fadeIn(); // Seçilen sekmeyi göster
-    });
-  });
-</script> -->

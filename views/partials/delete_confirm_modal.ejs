@@ -1,4 +1,3 @@
-<%- include("header.ejs") %>
 <div
   class="modal fade"
   id="deleteModal"
@@ -7,7 +6,7 @@
   aria-labelledby="deleteModalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog " role="document">
+  <div class="modal-dialog" role="document">
     <div class="modal-content black-backend">
       <div class="modal-header">
         <i class="fas fa-trash fa-2x"></i>
@@ -37,10 +36,12 @@
 <script>
   let deleteUrl = "";
   let deleteId = "";
+  let reloadId = "";
 
-  function confirmDelete(url, id) {
+  function confirmDelete(url, id, tableId) {
     deleteUrl = url;
     deleteId = id;
+    reloadId = tableId;
     $("#deleteModal").modal("show");
   }
 
@@ -51,11 +52,12 @@
         url: deleteUrl,
         type: "DELETE",
         success: function (response) {
-          alert("Kayıt başarıyla silindi!");
-          location.reload();
+          showToast("Silme İşlemi", "Başarı ile gerçekleşti.");
+
+          $(reloadId).DataTable().ajax.reload(null, false);
         },
         error: function (xhr, status, error) {
-          alert("Silme işlemi başarısız oldu: " + xhr.responseText);
+          showToast("Silme İşlemi", "Başarısız oldu." + xhr.responseText);
         },
       });
 
