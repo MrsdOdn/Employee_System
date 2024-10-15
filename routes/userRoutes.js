@@ -18,6 +18,41 @@ const upload = multer({
     limits: { fileSize: 1 * 1024 * 1024 } // 1 MB sınırı
 });
 
+const user_info_sql = 'SELECT * FROM employees';
+const job_info_sql = `SELECT 
+            e.employee_id,
+            e.first_name,
+            e.last_name,
+            jt.title_name AS title,
+            jta.task_name AS task,
+            d.division_name AS division,
+            dept.department_name AS department,
+            jd.description AS job_description,
+            et.type_name AS employee_type,
+            g.group_name AS group_name,
+            ep.employment_start_date,
+            ep.termination_date
+        FROM 
+            Employee_Positions ep
+        JOIN 
+            Employees e ON ep.employee_id = e.employee_id
+        JOIN 
+            Job_Titles jt ON ep.title = jt.id
+        JOIN 
+            Job_Tasks jta ON ep.task = jta.id
+        JOIN 
+            Divisions d ON ep.division = d.id
+        JOIN 
+            Departments dept ON ep.department = dept.id
+        JOIN 
+            Job_Descriptions jd ON ep.job_description = jd.id
+        JOIN 
+            Employee_Types et ON ep.employee_type = et.id
+        LEFT JOIN 
+            Employee_Groups eg ON e.employee_id = eg.employee_id
+        LEFT JOIN 
+            Groups g ON eg.group_id = g.id`;
+
 const announcement_sql = `SELECT 
     a.id AS announcement_id,
     a.title,
@@ -40,6 +75,10 @@ AND
 AND 
     (expiry_date IS NULL OR expiry_date > CURRENT_TIMESTAMP)
 `;
+const personal_info_sql = `SELECT * FROM Employee_Personal_Information`;
+const contact_info_sql = `SELECT * FROM Employee_Contacts`;
+const education_info_sql = `SELECT * FROM Employee_Educations`;
+const body_info_sql = `SELECT * FROM Employee_Body_Measurements`;
 
 router.get("/home", (req, res) => {
     res.render("../views/user/home");
@@ -85,21 +124,21 @@ router.get("/api/user/:id", async (req, res) => {
 });
 router.patch("/api/user/:id", upload.single("profileImage"), async (req, res) => {
     const { id } = req.params;
-    const { firstName, lastName, email, phone, password } = req.body;
+    const { first_name, last_name, email, phone, password } = req.body;
     const updates = [];
     const values = [];
 
     // Yüklenen dosyanın yolu
     const profileImage = req.file ? req.file.path : null;
 
-    if (firstName) {
+    if (first_name) {
         updates.push("first_name = $" + (updates.length + 1));
-        values.push(firstName);
+        values.push(first_name);
     }
 
-    if (lastName) {
+    if (last_name) {
         updates.push("last_name = $" + (updates.length + 1));
-        values.push(lastName);
+        values.push(last_name);
     }
 
     if (email) {
@@ -113,9 +152,9 @@ router.patch("/api/user/:id", upload.single("profileImage"), async (req, res) =>
     }
 
     if (password) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const password_hash = await bcrypt.hash(password, 10);
         updates.push("password_hash = $" + (updates.length + 1));
-        values.push(hashedPassword);
+        values.push(password_hash);
     }
 
     if (profileImage) {
@@ -258,7 +297,7 @@ router.patch("/api/job/:id", async (req, res) => {
 
 router.get("/api/personal/:id", async (req, res) => {
     const id = req.params.id;
-    const personalById_sql = personal_info_sql + ' WHERE e.employee_id = $1';
+    const personalById_sql = personal_info_sql + ' WHERE employee_id = $1';
 
     try {
         const result = await db.query(personalById_sql, [id]);
@@ -364,7 +403,7 @@ router.patch("/api/personal/:id", async (req, res) => {
 
 router.get("/api/contact/:id", async (req, res) => {
     const id = req.params.id;
-    const contactById_sql = contact_info_sql + ' WHERE e.employee_id = $1';
+    const contactById_sql = contact_info_sql + ' WHERE employee_id = $1';
 
     try {
         const result = await db.query(contactById_sql, [id]);
@@ -435,7 +474,7 @@ router.patch("/api/contact/:id", async (req, res) => {
 
 router.get("/api/education/:id", async (req, res) => {
     const id = req.params.id;
-    const educationById_sql = education_info_sql + ' WHERE e.employee_id = $1';
+    const educationById_sql = education_info_sql + ' WHERE employee_id = $1';
 
     try {
         const result = await db.query(educationById_sql, [id]);
@@ -510,7 +549,7 @@ router.patch("/api/education/:id", async (req, res) => {
 
 router.get("/api/body/:id", async (req, res) => {
     const id = req.params.id;
-    const bodyById_sql = body_info_sql + ' WHERE e.employee_id = $1';
+    const bodyById_sql = body_info_sql + ' WHERE employee_id = $1';
 
     try {
         const result = await db.query(bodyById_sql, [id]);

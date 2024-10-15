@@ -1,4 +1,3 @@
-<!-- Modal -->
 <div
   class="modal fade"
   id="imageUploadModal"
@@ -54,11 +53,11 @@
               >
               <div class="input-group-append">
                 <label for="upload" class="btn btn-light m-0 rounded-pill px-4">
-                  <i class="fa fa-cloud-upload mr-2 text-muted"></i
-                  ><small class="text-uppercase font-weight-bold text-muted"
+                  <i class="fa fa-cloud-upload mr-2 text-muted"></i>
+                  <small class="text-uppercase font-weight-bold text-muted"
                     >Choose file</small
-                  ></label
-                >
+                  >
+                </label>
               </div>
             </div>
           </div>
@@ -109,13 +108,9 @@
       const file = $("#upload")[0].files[0];
       const formData = new FormData();
       formData.append("profileImage", file);
-
-      formData.append("firstName", $("#firstName").val());
-      formData.append("lastName", $("#lastName").val());
-
       try {
         const userId = await user();
-        const url = "/api/user/" + userId;
+        const url = "/user/api/user/" + userId;
 
         const response = await $.ajax({
           type: "PATCH",
@@ -132,10 +127,7 @@
         $("#imageUploadModal").modal("hide");
       } catch (jqXHR) {
         console.error("Hata:", jqXHR.status, jqXHR.statusText);
-        showToast(
-          "Bir hata oluştu: ",
-          jqXHR.responseJSON.message || "Bilinmeyen bir hata"
-        );
+        showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
       }
     });
   });

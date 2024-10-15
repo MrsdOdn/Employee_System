@@ -1,7 +1,22 @@
 import express from 'express';
 import db from '../config/db.js';
+import multer from "multer";
+import path from 'path';
 
 const router = express.Router();
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/profile_images");
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    },
+});
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 1 * 1024 * 1024 } // 1 MB sınırı
+});
 const user_info_sql = 'SELECT * FROM employees';
 const job_info_sql = `SELECT 
             e.employee_id,
@@ -250,18 +265,21 @@ router.get("/api/calisanlar/user/:id", async (req, res) => {
 });
 router.patch("/api/calisanlar/user/:id", async (req, res) => {
     const { id } = req.params;
-    const { firstName, lastName, email, phone, password, profileImage } = req.body;
+    const { first_name, last_name, email, phone, password } = req.body;
     const updates = [];
     const values = [];
 
-    if (firstName) {
+    // Yüklenen dosyanın yolu
+    const profileImage = req.file ? req.file.path : null;
+
+    if (first_name) {
         updates.push("first_name = $" + (updates.length + 1));
-        values.push(firstName);
+        values.push(first_name);
     }
 
-    if (lastName) {
+    if (last_name) {
         updates.push("last_name = $" + (updates.length + 1));
-        values.push(lastName);
+        values.push(last_name);
     }
 
     if (email) {
@@ -275,14 +293,16 @@ router.patch("/api/calisanlar/user/:id", async (req, res) => {
     }
 
     if (password) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const password_hash = await bcrypt.hash(password, 10);
         updates.push("password_hash = $" + (updates.length + 1));
-        values.push(hashedPassword);
+        values.push(password_hash);
     }
+
     if (profileImage) {
         updates.push("profile_image = $" + (updates.length + 1));
         values.push(profileImage);
     }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: "Güncellenecek bir alan bulunamadı" });
     }
@@ -308,6 +328,16 @@ router.patch("/api/calisanlar/user/:id", async (req, res) => {
         console.error("Güncelleme hatası:", error);
         res.status(500).json({ error: "Veritabanı güncelleme sırasında bir hata oluştu" });
     }
+});
+router.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        // Multer hatası
+        return res.status(500).json({ error: "Multer hatası: " + err.message });
+    } else if (err) {
+        // Diğer hatalar
+        return res.status(500).json({ error: "Hata: " + err.message });
+    }
+    next();
 });
 router.delete('/api/calisanlar/user/:id', async (req, res) => {
     const id = req.params.id;

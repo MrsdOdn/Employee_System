@@ -1,0 +1,193 @@
+<div
+  class="modal show"
+  id="profileModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="profileModalLabel"
+  aria-hidden="true"
+  style="display: block"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="profileModalLabel">Employee Profile</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="row">
+            <div
+              class="col-lg-4 col-md-12 d-flex justify-content-center align-items-center"
+            >
+              <div>
+                <img
+                  id="profile_image"
+                  class="img-fluid rounded mb-2"
+                  src=""
+                  alt="Profile Image"
+                  style="max-width: 100%; height: auto"
+                />
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block mt-2"
+                  data-toggle="modal"
+                  data-target="#imageUploadModal"
+                >
+                  Upload Image
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-8 col-md-12">
+              <form id="employeeForm">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label"
+                      >First Name</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="first_name"
+                      readonly
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="last_name"
+                      readonly
+                    />
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    readonly
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="phone_number" class="form-label"
+                    >Phone Number</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="phone_number"
+                    readonly
+                  />
+                </div>
+                <button type="button" class="btn btn-primary" id="editBtn">
+                  Edit
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  id="saveBtn"
+                  style="display: none"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="cancelBtn"
+                  style="display: none"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(async function () {
+    const employeeData = {};
+    const userId = await user();
+    const url = "/user/api/user/" + userId;
+
+    $.ajax({
+      url: url,
+      method: "GET",
+      success: function (data) {
+        employeeData.tc_no = data.tc_no;
+        employeeData.first_name = data.first_name;
+        employeeData.last_name = data.last_name;
+        employeeData.email = data.email;
+        employeeData.phone_number = data.phone_number;
+        employeeData.profile_image = data.profile_image;
+        console.log("Kişi bilgileri başarıyla alındı:", employeeData);
+      },
+      error: function (err) {
+        console.error("Kişi bilgisi alınırken bir hata oluştu.", err);
+      },
+    });
+    $("#tc_no").val(employeeData.tc_no);
+    $("#first_name").val(employeeData.first_name);
+    $("#last_name").val(employeeData.last_name);
+    $("#email").val(employeeData.email);
+    $("#phone_number").val(employeeData.phone_number);
+    $("#profile_image").attr("src", employeeData.profile_image);
+
+    $("#editBtn").click(function () {
+      $("input").removeAttr("readonly");
+      $("#profile_image_upload").show();
+      $("#editBtn").hide();
+      $("#saveBtn, #cancelBtn").show();
+    });
+
+    // Cancel Button
+    $("#cancelBtn").click(function () {
+      $("input").attr("readonly", true);
+      $("#profile_image_upload").hide();
+      $("#saveBtn, #cancelBtn").hide();
+      $("#editBtn").show();
+    });
+    $(".close").click(function () {
+      $("#profileModal").modal("hide");
+    });
+    $(document).on('click', function (e) {
+      if ($(e.target).closest('#profileModal').length === 0) {
+        $("#profileModal").modal('hide');
+      }
+    });
+
+    $("#employeeForm").submit(function (event) {
+      event.preventDefault();
+
+      const updatedData = {
+        first_name: $("#first_name").val(),
+        last_name: $("#last_name").val(),
+        email: $("#email").val(),
+        phone_number: $("#phone_number").val(),
+        profile_image: $("#profile_image_upload")[0].files[0],
+      };
+
+      console.log("Updated Data:", updatedData);
+
+      // Perform PATCH request here (via AJAX or Fetch API)
+
+      $("input").attr("readonly", true);
+      $("#profile_image_upload").hide();
+      $("#saveBtn, #cancelBtn").hide(); 
+      $("#editBtn").show();
+    });
+  });
+</script>

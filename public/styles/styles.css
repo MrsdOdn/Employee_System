@@ -18,7 +18,8 @@
     border-color: #009485ff;
     color: white;
 }
-.btn-primary:hover{
+
+.btn-primary:hover {
     background-color: var(--dark-green);
     border-color: var(--dark-green);
 }
@@ -208,7 +209,7 @@ table.dataTable tfoot th {
 
 /*Şifre değiştirme alanı css*/
 .pass_show {
-    position: relative
+    position: relative;
 }
 
 .pass_show .ptxt {
@@ -217,13 +218,44 @@ table.dataTable tfoot th {
     right: 10px;
     z-index: 1;
     color: #f36c01;
-    margin-top: -10px;
     cursor: pointer;
-    transition: .3s ease all;
+    transition: 0.3s ease all;
+    font-size: 12px;
+    transform: translateY(-50%);
 }
 
 .pass_show .ptxt:hover {
-    color: #333333;
+    color: #333;
+}
+
+.input-group-text {
+    background-color: #f36c01;
+    color: white;
+}
+
+.input-group-text:hover {
+    background-color: #e67e22;
+}
+
+.icon-btn-save {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.btn-save-label {
+    position: relative;
+    left: -12px;
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px 0 0 3px;
+}
+body > div.content > div > div > div > div > div.card-header.bg-info.text-white{
+    background-color: var(--light-green)!important;
+}
+
+.vh-100 {
+    min-height: 100vh;
 }
 
 /*Error page style*/
@@ -401,29 +433,77 @@ table.dataTable tfoot th {
     z-index: 2;
     position: relative;
 }
+
 .image-area {
     border: 2px dashed rgba(255, 255, 255, 0.7);
     padding: 1rem;
     position: relative;
-    height: 200px; /* Yükseklik belirleyin */
-    display: flex; /* Flexbox kullanarak içeriği ortalayın */
-    justify-content: center; /* Ortalayın */
-    align-items: center; /* Ortalayın */
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .image-area img {
     max-width: 100%;
     max-height: 100%;
-    display: block; /* Görseli merkezler */
-    margin: 0 auto; /* Ortalar */
+    display: block;
+    margin: 0 auto;
 }
 
 .modal-body {
-    text-align: center; /* Modal içeriğini ortalar */
+    text-align: center;
 }
 
 #upload-label {
-    cursor: pointer; /* İmleç el şekli */
+    cursor: pointer;
+}
+
+/*user profile css*/
+.img-account-profile {
+    height: 10rem;
+}
+
+.rounded-circle {
+    border-radius: 50% !important;
+}
+
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgb(33 40 50 / 15%);
+}
+
+.card .card-header {
+    font-weight: 500;
+}
+
+.card-header:first-child {
+    border-radius: 0.35rem 0.35rem 0 0;
+}
+
+.card-header {
+    padding: 1rem 1.35rem;
+    margin-bottom: 0;
+    background-color: rgba(33, 40, 50, 0.03);
+    border-bottom: 1px solid var(--white);
+}
+
+.form-control,
+.dataTable-input {
+    display: block;
+    width: 100%;
+    /* padding: 0.875rem 1.125rem; */
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1;
+    color: #69707a;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #c5ccd6;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.35rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 

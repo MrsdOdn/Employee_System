@@ -1,0 +1,184 @@
+<div class="container-xl px-4 mt-4">
+    <hr class="mt-0 mb-4" />
+    <div class="row">
+      <div class="col-xl-4">
+        <!-- Profile picture card-->
+        <div class="card mb-4 mb-xl-0 black-backend">
+          <div class="card-header">Profil Resmi</div>
+          <div class="card-body text-center">
+            <!-- Profile picture image-->
+            <img
+              class="img-account-profile rounded-circle mb-2"
+              src="http://bootdey.com/img/Content/avatar/avatar1.png"
+              alt="profile image"
+            />
+            <!-- Profile picture help block-->
+            <div class="small font-italic text-muted mb-4">
+              JPG or PNG no larger than 1 MB
+            </div>
+            <!-- Profile picture upload button-->
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-toggle="modal"
+              data-target="#profileModal"
+            >
+              Profili Düzenle
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Profile Edit Modal -->
+  <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content black-backend">
+        <div class="modal-header">
+          <h5 class="modal-title" id="profileModalLabel">Profil Düzenle</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center mb-3">
+            <img class="img-account-profile rounded-circle mb-2 profile-image-modal" src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="profile image" />
+            <div class="small font-italic text-muted mb-2">JPG or PNG no larger than 1 MB</div>
+            <input type="file" class="form-control-file" id="profileImageInput" accept="image/png, image/jpeg" />
+          </div>
+          <form id="profileForm" enctype="multipart/form-data">
+            <!-- Form Group (Tc No) -->
+            <div class="mb-3">
+              <label class="small mb-1" for="inputTcNo">Tc No:</label>
+              <input
+                class="form-control"
+                id="inputTcNo"
+                type="text"
+                placeholder="Enter your Tc no"
+                value="TcNo"
+              />
+            </div>
+            <!-- Form Row (First Name & Last Name) -->
+            <div class="row gx-3 mb-3">
+              <!-- Form Group (first name)-->
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputFirstName">İsim</label>
+                <input
+                  class="form-control"
+                  id="inputFirstName"
+                  type="text"
+                  placeholder="Enter your first name"
+                  value="Name"
+                />
+              </div>
+              <!-- Form Group (last name)-->
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputLastName">Soyisim</label>
+                <input
+                  class="form-control"
+                  id="inputLastName"
+                  type="text"
+                  placeholder="Enter your last name"
+                  value="Surname"
+                />
+              </div>
+            </div>
+            <!-- Form Group (Phone Number) -->
+            <div class="mb-3">
+              <label class="small mb-1" for="inputPhone">Telefon Numarası</label>
+              <input
+                class="form-control"
+                id="inputPhone"
+                type="tel"
+                placeholder="Enter your phone number"
+                value="555-xxx-xxxx"
+              />
+            </div>
+            <!-- Form Group (Email Address) -->
+            <div class="mb-3">
+              <label class="small mb-1" for="inputEmailAddress">Email address</label>
+              <input
+                class="form-control"
+                id="inputEmailAddress"
+                type="email"
+                placeholder="Enter your email address"
+                value="name@example.com"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+          <button type="button" class="btn btn-primary btn-user-change">Değişiklikleri Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    $(document).ready(function () {
+      async function initialize() {
+        try {
+          const userId = await user();
+          const url = "/user/api/user/" + userId;
+  
+          const data = await $.ajax({
+            url: url,
+            method: "GET",
+          });
+  
+          $("#inputTcNo").val(data.tc_no);
+          $("#inputFirstName").val(data.first_name);
+          $("#inputLastName").val(data.last_name);
+          $("#inputEmailAddress").val(data.email);
+          $("#inputPhone").val(data.phone_number);
+          $(".profile-image-modal").attr("src", "../../" + data.profile_image);
+        } catch (error) {
+          console.error("Hata oluştu:", error);
+        }
+      }
+  
+      initialize(); // Asenkron fonksiyonu başlat
+  
+      $(".btn-user-change").click(async function () {
+        const updatedData = {
+          tc_no: $("#inputTcNo").val(),
+          first_name: $("#inputFirstName").val(),
+          last_name: $("#inputLastName").val(),
+          email: $("#inputEmailAddress").val(),
+          phone_number: $("#inputPhone").val(),
+        };
+  
+        // Profil resmi için ayrı bir işlem
+        const formData = new FormData();
+        formData.append("tc_no", updatedData.tc_no);
+        formData.append("first_name", updatedData.first_name);
+        formData.append("last_name", updatedData.last_name);
+        formData.append("email", updatedData.email);
+        formData.append("phone_number", updatedData.phone_number);
+  
+        const profileImage = $("#profileImageInput")[0].files[0];
+        if (profileImage) {
+          formData.append("profile_image", profileImage);
+        }
+  
+        try {
+          const userId = await user();
+          const url = "/user/api/user/" + userId;
+          const response = await $.ajax({
+            type: "PATCH",
+            url: url,
+            data: formData,
+            contentType: false, // Bunu false yaparak jQuery'nin formData'yı işleme biçimini değiştirebilirsin.
+            processData: false, // formData'nın stringe dönüştürülmesini önler.
+          });
+          showToast("Profil Bilgileri", "Başarı ile değiştirildi!");
+        } catch (jqXHR) {
+          console.error("Hata:", jqXHR.status, jqXHR.statusText);
+          showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+        }
+      });
+    });
+  </script>
+  

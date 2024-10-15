@@ -12,11 +12,15 @@ import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import moment from "moment";
 import cors from "cors";
-
+import path from "path";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 dotenv.config();
 const app = express();
 const port = 3000;
+
 app.use(cors());
 app.use(session({
     secret: process.env.SESSION_SECRET,

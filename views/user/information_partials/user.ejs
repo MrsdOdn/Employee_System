@@ -1,118 +1,159 @@
-<div class="container">
+<%- include("../../partials/image_upload.ejs") %>
+<div class="container-xl px-4 mt-4">
+  <hr class="mt-0 mb-4" />
   <div class="row">
-    <div class="col-lg-12">
-      <h3 class="text-dark">General Information</h3>
-    </div>
-  </div>
-  <div class="container py-5 text-center">
-    <button
-      type="button"
-      class="btn btn-primary"
-      data-toggle="modal"
-      data-target="#imageUploadModal"
-    >
-      Open Image Upload Modal
-    </button>
-  </div>
-
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="job-detail mt-2 p-4">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="resume-user mb-5">
-              <i class="mdi mdi-account text-white"></i>
-            </div>
+    <div class="col-xl-4">
+      <div class="card mb-4 mb-xl-0 black-backend">
+        <div class="card-header">Profil Resmi</div>
+        <div class="card-body text-center">
+          <img
+            class="img-account-profile rounded-circle mb-2"
+            src="http://bootdey.com/img/Content/avatar/avatar1.png"
+            alt="profile image"
+          />
+          <div class="small font-italic text-muted mb-4">
+            JPG or PNG no larger than 1 MB
           </div>
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-toggle="modal"
+            data-target="#imageUploadModal"
+          >
+            Yeni Resim Yükle
+          </button>
         </div>
-
-        <div class="custom-form">
+      </div>
+    </div>
+    <div class="col-xl-8">
+      <div class="card mb-4 black-backend">
+        <div class="card-header">Profil Detay</div>
+        <div class="card-body">
           <form>
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group app-label">
-                  <label for="frist-name" class="text-muted">First Name</label>
-                  <input
-                    id="frist-name"
-                    type="text"
-                    class="form-control resume"
-                    placeholder=""
-                  />
-                </div>
+            <div class="mb-3">
+              <label class="small mb-1" for="inputTcNo">Tc No:</label>
+              <input
+                class="form-control"
+                id="inputTcNo"
+                type="text"
+                placeholder="Enter your Tc no"
+                value="TcNo"
+              />
+            </div>
+            <div class="row gx-3 mb-3">
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputFirstName">İsim</label>
+                <input
+                  class="form-control"
+                  id="inputFirstName"
+                  type="text"
+                  placeholder="Enter your first name"
+                  value="Name"
+                />
               </div>
-
-              <div class="col-md-4">
-                <div class="form-group app-label">
-                  <label for="middle-name" class="text-muted"
-                    >Middle Name</label
-                  >
-                  <input
-                    id="middle-name"
-                    type="text"
-                    class="form-control resume"
-                    placeholder=""
-                  />
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group app-label">
-                  <label for="surname-name" class="text-muted">Surname</label>
-                  <input
-                    id="surname-name"
-                    type="text"
-                    class="form-control resume"
-                    placeholder=""
-                  />
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group app-label">
-                  <label for="date-of-birth" class="text-muted"
-                    >Date Of Birth</label
-                  >
-                  <input
-                    id="date-of-birth"
-                    type="text"
-                    class="form-control resume"
-                    placeholder="13-02-1999"
-                  />
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group app-label">
-                  <label for="General" class="text-muted">General</label>
-                  <div class="form-button">
-                    <select class="nice-select">
-                      <option data-display="General">General</option>
-                      <option value="1">Male</option>
-                      <option value="2">Female</option>
-                      <option value="3">Other</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="form-group app-label">
-                  <label for="marital-status" class="text-muted"
-                    >Marital Status</label
-                  >
-                  <div class="form-button">
-                    <select class="nice-select">
-                      <option data-display="Status">Status</option>
-                      <option value="1">Single</option>
-                      <option value="2">Married</option>
-                    </select>
-                  </div>
-                </div>
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputLastName">Soyisim</label>
+                <input
+                  class="form-control"
+                  id="inputLastName"
+                  type="text"
+                  placeholder="Enter your last name"
+                  value="Surname"
+                />
               </div>
             </div>
+            <div class="mb-3">
+              <label class="small mb-1" for="inputPhone"
+                >Telefon Numarası</label
+              >
+              <input
+                class="form-control"
+                id="inputPhone"
+                type="tel"
+                placeholder="Enter your phone number"
+                value="555-xxx-xxxx"
+              />
+            </div>
+            
+            <div class="mb-3">
+              <label class="small mb-1" for="inputEmailAddress"
+                >Email address</label
+              >
+              <input
+                class="form-control"
+                id="inputEmailAddress"
+                type="email"
+                placeholder="Enter your email address"
+                value="name@example.com"
+              />
+            </div>
+            <button class="btn btn-primary btn-user-change" type="button">
+              Save changes
+            </button>
           </form>
         </div>
       </div>
     </div>
   </div>
 </div>
+<script>
+  $(document).ready(function () {
+    async function initialize() {
+      try {
+        const userId = await user();
+        const url = "/user/api/user/" + userId;
+
+        const data = await $.ajax({
+          url: url,
+          method: "GET",
+        });
+
+        $("#inputTcNo").val(data.tc_no);
+        $("#inputFirstName").val(data.first_name);
+        $("#inputLastName").val(data.last_name);
+        $("#inputEmailAddress").val(data.email);
+        $("#inputPhone").val(data.phone_number);
+        $(".img-account-profile").attr("src", "../../" + data.profile_image);
+      } catch (error) {
+        console.error("Hata oluştu:", error);
+      }
+    }
+
+    initialize(); // Asenkron fonksiyonu başlat
+
+    $(".btn-user-change").click(async function () {
+      const updatedData = {
+        tc_no: $("#inputTcNo").val(),
+        first_name: $("#inputFirstName").val(),
+        last_name: $("#inputLastName").val(),
+        email: $("#inputEmailAddress").val(),
+        phone_number: $("#inputPhone").val(),
+      };
+
+      console.log("Güncellenmiş Veriler:", updatedData);
+
+      try {
+        const userId = await user();
+        const url = "/user/api/user/" + userId;
+        const response = await $.ajax({
+          type: "PATCH",
+          url: url,
+          data: JSON.stringify(updatedData),
+          contentType: "application/json",
+          success: function (data) {
+            $("#inputTcNo").val(data.tc_no);
+            $("#inputFirstName").val(data.first_name);
+            $("#inputLastName").val(data.last_name);
+            $("#inputEmailAddress").val(data.email);
+            $("#inputPhone").val(data.phone_number);
+            $("body > div.container > div.navigation > ul > li:nth-child(1) > a > span").text(data.first_name +" "+ data.last_name);
+            showToast("Profil Bilgileri", "Başarı ile değiştirildi!");
+          },
+        });
+      } catch (jqXHR) {
+        console.error("Hata:", jqXHR.status, jqXHR.statusText);
+        showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+      }
+    });
+  });
+</script>

@@ -1,0 +1,122 @@
+<%- include("../../partials/image_upload.ejs") %>
+<div class="container-xl px-4 mt-4">
+  <hr class="mt-0 mb-4" />
+  <div class="row">
+    <div class="col-xl-12">
+      <div class="card mb-4 black-backend">
+        <div class="card-header">İletişim Bilgiler Detay</div>
+        <div class="card-body">
+          <form>
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputAddressType"
+                  >Adres Tipi</label
+                >
+                <input
+                  class="form-control"
+                  id="inputAddressType"
+                  type="text"
+                  placeholder="Adres tipi giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputCity">Şehir</label>
+                <input
+                  class="form-control"
+                  id="inputCity"
+                  type="text"
+                  placeholder="Şehir giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputState">Eyalet</label>
+                <input
+                  class="form-control"
+                  id="inputState"
+                  type="text"
+                  placeholder="Eyalet giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputFullAddress"
+                  >Tam Adres</label
+                >
+                <textarea
+                  class="form-control"
+                  id="inputFullAddress"
+                  placeholder="Tam adresi giriniz"
+                ></textarea>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputEmergencyContact"
+                  >Acil İletişim</label
+                >
+                <input
+                  class="form-control"
+                  id="inputEmergencyContact"
+                  type="text"
+                  placeholder="Acil iletişim giriniz"
+                />
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-user-change" type="button">
+              Değişiklikleri Kaydet
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    async function initialize() {
+      try {
+        const userId = await user();
+        const url = "/user/api/contact/" + userId;
+
+        const data = await $.ajax({
+          url: url,
+          method: "GET",
+        });
+        $("#inputAddressType").val(data.address_type);
+        $("#inputCity").val(data.city);
+        $("#inputState").val(data.state);
+        $("#inputFullAddress").val(data.full_address);
+        $("#inputEmergencyContact").val(data.emergency_contact);
+      } catch (error) {
+        console.error("Hata oluştu:", error);
+      }
+    }
+
+    initialize();
+
+    $(".btn-user-change").click(async function () {
+      const updatedData = {
+        address_type: $("#inputAddressType").val(),
+        city: $("#inputCity").val(),
+        state: $("#inputState").val(),
+        full_address: $("#inputFullAddress").val(),
+        emergency_contact: $("#inputEmergencyContact").val(),
+      };
+
+      try {
+        const userId = await user();
+        await $.ajax({
+          url: "/user/api/contact/" + userId,
+          method: "PATCH",
+          contentType: "application/json",
+          data: JSON.stringify(updatedData),
+        });
+        alert("Bilgiler güncellendi.");
+      } catch (error) {
+        console.error("Güncelleme sırasında hata oluştu:", error);
+      }
+    });
+  });
+</script>

@@ -1,0 +1,223 @@
+<%- include("../../partials/image_upload.ejs") %>
+<div class="container-xl px-4 mt-4">
+  <hr class="mt-0 mb-4" />
+  <div class="row">
+    <div class="col-xl-12">
+      <div class="card mb-4 black-backend">
+        <div class="card-header">Kişisel Bilgiler Detay</div>
+        <div class="card-body">
+          <form>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputBirthDate"
+                  >Doğum Tarihi</label
+                >
+                <input class="form-control" id="inputBirthDate" type="date" />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputNationality">Uyruk</label>
+                <input
+                  class="form-control"
+                  id="inputNationality"
+                  type="text"
+                  placeholder="Uyruk giriniz"
+                />
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="small mb-1" for="selectGender">Cinsiyet</label>
+                <select class="form-control" id="selectGender">
+                  <option value="" disabled selected hidden>
+                    Cinsiyeti seçin
+                  </option>
+                  <option value="male">Erkek</option>
+                  <option value="female">Kadın</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="small mb-1" for="selectMaritalStatus"
+                  >Medeni Durum</label
+                >
+                <select class="form-control" id="selectMaritalStatus">
+                  <option value="" disabled selected hidden>
+                    Medeni durumu seçin
+                  </option>
+                  <option value="single">Bekar</option>
+                  <option value="married">Evli</option>
+                  <option value="widowed">Dul</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="small mb-1" for="selectBloodType"
+                  >Kan Grubu</label
+                >
+                <select class="form-control" id="selectBloodType">
+                  <option value="" disabled selected hidden>
+                    Kan grubunu seçin
+                  </option>
+                  <option value="0rh+">0 Rh+</option>
+                  <option value="0rh-">0 Rh-</option>
+                  <option value="Ahr+">A Rh+</option>
+                  <option value="Ahr-">A Rh-</option>
+                  <option value="Bhr+">B Rh+</option>
+                  <option value="Bhr-">B Rh-</option>
+                  <option value="ABhr+">AB Rh+</option>
+                  <option value="ABhr-">AB Rh-</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputMotherName">Anne Adı</label>
+                <input
+                  class="form-control"
+                  id="inputMotherName"
+                  type="text"
+                  placeholder="Anne adını giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputFatherName">Baba Adı</label>
+                <input
+                  class="form-control"
+                  id="inputFatherName"
+                  type="text"
+                  placeholder="Baba adını giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="selectMilitaryStatus"
+                  >Askerlik Durumu</label
+                >
+                <select class="form-control" id="selectMilitaryStatus">
+                  <option value="" disabled selected hidden>
+                    Askerlik durumunu seçin
+                  </option>
+                  <option value="completed">Tamamlandı</option>
+                  <option value="exempt">Muaf</option>
+                  <option value="postponed">Ertelendi</option>
+                  <option value="not_completed">Tamamlanmadı</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="selectEducationLevel"
+                  >Eğitim Durumu</label
+                >
+                <select class="form-control" id="selectEducationLevel">
+                  <option value="" disabled selected hidden>
+                    Eğitim durumunu seçin
+                  </option>
+                  <option value="orta_okul">Orta Okul</option>
+                  <option value="lise">Lise</option>
+                  <option value="lisans">Lisans</option>
+                  <option value="yüksek_lisans">Yüksek Lisans</option>
+                  <option value="doktara">Doktora</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputBirthPlace"
+                  >Doğum Yeri</label
+                >
+                <input
+                  class="form-control"
+                  id="inputBirthPlace"
+                  type="text"
+                  placeholder="Doğum yerini giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputRegistrationNumber"
+                  >Sicil Numarası</label
+                >
+                <input
+                  class="form-control"
+                  id="inputRegistrationNumber"
+                  type="text"
+                  placeholder="Kayıt numarasını giriniz"
+                />
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-user-change" type="button">
+              Değişiklikleri Kaydet
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    async function initialize() {
+      try {
+        const userId = await user();
+        const url = "/user/api/personal/" + userId;
+
+        const data = await $.ajax({
+          url: url,
+          method: "GET",
+        });
+        const birthDate = new Date(data.birth_date).toISOString().split("T")[0];
+
+        $("#inputBirthDate").val(birthDate);
+        $("#selectGender").val(data.gender || "");
+        $("#inputNationality").val(data.nationality);
+        $("#selectMaritalStatus").val(data.marital_status || "");
+        $("#selectBloodType").val(data.blood_type || "");
+        $("#inputMotherName").val(data.mother_name);
+        $("#inputFatherName").val(data.father_name);
+        $("#selectMilitaryStatus").val(data.military_status || "");
+        $("#selectEducationLevel").val(data.education_level || "");
+        $("#inputBirthPlace").val(data.birth_place);
+        $("#inputRegistrationNumber").val(data.registration_number);
+      } catch (error) {
+        console.error("Hata oluştu:", error);
+      }
+    }
+
+    initialize();
+
+    $(".btn-user-change").click(async function () {
+      const updatedData = {
+        birth_date: $("#inputBirthDate").val(),
+        gender: $("#selectGender").val(),
+        nationality: $("#inputNationality").val(),
+        marital_status: $("#selectMaritalStatus").val(),
+        blood_type: $("#selectBloodType").val(),
+        mother_name: $("#inputMotherName").val(),
+        father_name: $("#inputFatherName").val(),
+        military_status: $("#selectMilitaryStatus").val(),
+        education_level: $("#selectEducationLevel").val(),
+        birth_place: $("#inputBirthPlace").val(),
+        registration_number: $("#inputRegistrationNumber").val(),
+      };
+
+      console.log("Güncellenmiş Veriler:", updatedData);
+
+      try {
+        const userId = await user();
+        const url = "/user/api/personal/" + userId;
+        const response = await $.ajax({
+          type: "PATCH",
+          url: url,
+          data: JSON.stringify(updatedData),
+          contentType: "application/json",
+          success: function (data) {
+            showToast("Kişisel Bilgiler", "Başarı ile değiştirildi!");
+          },
+        });
+      } catch (jqXHR) {
+        console.error("Hata:", jqXHR.status, jqXHR.statusText);
+        showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+      }
+    });
+  });
+</script>

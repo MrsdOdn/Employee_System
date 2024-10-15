@@ -1,0 +1,153 @@
+<div class="container-xl px-4 mt-4">
+  <hr class="mt-0 mb-4" />
+  <div class="row">
+    <div class="col-xl-12">
+      <div class="card mb-4 black-backend">
+        <div class="card-header">İş Bilgisi Detay</div>
+        <div class="card-body">
+          <form>
+            <div class="row gx-3 mb-3">
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputJobTitle">İş Unvanı</label>
+                <input
+                  class="form-control"
+                  id="inputJobTitle"
+                  type="text"
+                  readonly
+                  placeholder="Enter your job title"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputJobTask">Görev</label>
+                <input
+                  class="form-control"
+                  id="inputJobTask"
+                  type="text"
+                  readonly
+                  placeholder="Enter your job task"
+                />
+              </div>
+            </div>
+            <div class="row gx-3 mb-3">
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputDepartment">Bölüm</label>
+                <input
+                  class="form-control"
+                  id="inputDepartment"
+                  type="text"
+                  readonly
+                  placeholder="Enter your department"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputDivision">Birlik</label>
+                <input
+                  class="form-control"
+                  id="inputDivision"
+                  type="text"
+                  readonly
+                  placeholder="Enter your division"
+                />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="small mb-1" for="inputJobDescription"
+                >İş Tanımı</label
+              >
+              <textarea
+                class="form-control"
+                id="inputJobDescription"
+                readonly
+                placeholder="Enter job description"
+              ></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="small mb-1" for="inputEmployeeType"
+                >Çalışan Türü</label
+              >
+              <input
+                class="form-control"
+                id="inputEmployeeType"
+                type="text"
+                readonly
+                placeholder="Enter employee type"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="small mb-1" for="inputGroupName">Grup Adı</label>
+              <input
+                class="form-control"
+                id="inputGroupName"
+                type="text"
+                readonly
+                placeholder="Enter group name"
+              />
+            </div>
+            <div class="row gx-3 mb-3">
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputStartDate"
+                  >Başlangıç Tarihi</label
+                >
+                <input
+                  class="form-control"
+                  id="inputStartDate"
+                  type="date"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="small mb-1" for="inputTerminationDate"
+                  >Bitiş Tarihi</label
+                >
+                <input
+                  class="form-control"
+                  id="inputTerminationDate"
+                  type="date"
+                  readonly
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    async function initialize() {
+      try {
+        const userId = await user();
+        const url = "/user/api/job/" + userId;
+
+        const data = await $.ajax({
+          url: url,
+          method: "GET",
+        });
+
+        $("#inputJobTitle").val(data.title);
+        $("#inputJobTask").val(data.task);
+        $("#inputDepartment").val(data.department);
+        $("#inputDivision").val(data.division);
+        $("#inputJobDescription").val(data.job_description);
+        $("#inputEmployeeType").val(data.employee_type);
+        $("#inputGroupName").val(data.group_name);
+
+        const startDate = new Date(data.employment_start_date)
+          .toISOString()
+          .split("T")[0];
+        const terminationDate = data.termination_date
+          ? new Date(data.termination_date).toISOString().split("T")[0]
+          : "";
+
+        $("#inputStartDate").val(startDate);
+        $("#inputTerminationDate").val(terminationDate);
+      } catch (error) {
+        console.error("Hata oluştu:", error);
+      }
+    }
+
+    initialize();
+  });
+</script>

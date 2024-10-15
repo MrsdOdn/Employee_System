@@ -88,8 +88,7 @@
   aria-labelledby="nav-user-tab"
   tabindex="0"
 >
-  <%- include("./information_partials/user.ejs") %> <%-
-  include("../partials/image_upload.ejs") %>
+  <%- include("./information_partials/user.ejs") %>
 </div>
 <div
   class="tab-pane fade"
@@ -97,21 +96,27 @@
   role="tabpanel"
   aria-labelledby="nav-job-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./information_partials/job.ejs") %>
+</div>
 <div
   class="tab-pane fade"
   id="nav-personal"
   role="tabpanel"
   aria-labelledby="nav-personal-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./information_partials/personal.ejs") %>
+</div>
 <div
   class="tab-pane fade"
   id="nav-contact"
   role="tabpanel"
   aria-labelledby="nav-contact-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./information_partials/contact.ejs") %>
+</div>
 
 <div
   class="tab-pane fade"
@@ -119,14 +124,18 @@
   role="tabpanel"
   aria-labelledby="nav-education-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./information_partials/education.ejs") %>
+</div>
 <div
   class="tab-pane fade"
   id="nav-body"
   role="tabpanel"
   aria-labelledby="nav-body-tab"
   tabindex="0"
-></div>
+>
+  <%- include("./information_partials/body.ejs") %>
+</div>
 
 <script>
   async function user() {
