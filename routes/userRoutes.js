@@ -456,7 +456,7 @@ router.patch("/api/contact/:id", async (req, res) => {
             return res.status(400).json({ error: "Hiçbir alan güncellenmedi." });
         }
 
-        const query = `UPDATE Employee_Contacts SET ${fields.join(", ")} WHERE address_id = $${fields.length + 1} RETURNING *`;
+        const query = `UPDATE Employee_Contacts SET ${fields.join(", ")} WHERE employee_id = $${fields.length + 1} RETURNING *`;
         values.push(contactId);
 
         const result = await db.query(query, values);
@@ -531,7 +531,7 @@ router.patch("/api/education/:id", async (req, res) => {
             return res.status(400).json({ error: "Güncellenmesi gereken alan belirtilmedi." });
         }
 
-        const query = `UPDATE Employee_Educations SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = $${fields.length + 1} RETURNING *`;
+        const query = `UPDATE Employee_Educations SET ${fields.join(", ")} WHERE employee_id = $${fields.length + 1} RETURNING *`;
         values.push(educationId);
 
         const result = await db.query(query, values);
@@ -607,7 +607,7 @@ router.patch("/api/body/:id", async (req, res) => {
             return res.status(400).json({ error: "Güncellenmesi gereken alan belirtilmedi." });
         }
 
-        const query = `UPDATE Employee_Body_Measurements SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = $${fields.length + 1} RETURNING *`;
+        const query = `UPDATE Employee_Body_Measurements SET ${fields.join(", ")} WHERE employee_id = $${fields.length + 1} RETURNING *`;
         values.push(measurementId);
 
         const result = await db.query(query, values);

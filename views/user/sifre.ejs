@@ -1,7 +1,7 @@
 <div class="container d-flex justify-content-center align-items-center vh-100">
-  <div class="row ">
+  <div class="row">
     <div class="col-md-12">
-      <div class="card shadow-lg">
+      <div class="card shadow-lg black-backend">
         <div class="card-header bg-info text-white">
           <h3 class="card-title">
             <i class="fas fa-user-lock"></i> Şifre Değiştir
@@ -11,86 +11,147 @@
           <div class="row">
             <div class="col-md-6 text-center">
               <img
-                alt=""
+                alt="change password"
                 class="img-thumbnail rounded-circle"
-                src="https://bootdey.com/img/Content/avatar/avatar1.png"
+                src="../../uploads/profile_images/OIG2.jpeg"
               />
             </div>
             <div class="col-md-6 mt-4">
-              <div class="form-group pass_show">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">
-                      <i class="fas fa-eye-slash"></i>
-                    </span>
+              <form id="changePasswordForm">
+                <div class="form-group pass_show">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="fas fa-eye-slash"></i>
+                      </span>
+                    </div>
+                    <input
+                      class="form-control"
+                      type="password"
+                      placeholder="Current Password"
+                      id="currentPassword"
+                      required
+                    />
                   </div>
-                  <input
-                    class="form-control"
-                    type="password"
-                    placeholder="Current Password"
-                    id="currentPassword"
-                  />
                 </div>
-              </div>
 
-              <div class="form-group pass_show">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">
-                      <i class="fas fa-key"></i>
-                    </span>
+                <div class="form-group pass_show">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="fas fa-key"></i>
+                      </span>
+                    </div>
+                    <input
+                      class="form-control"
+                      type="password"
+                      placeholder="New Password"
+                      id="newPassword"
+                      required
+                    />
                   </div>
-                  <input
-                    class="form-control"
-                    type="password"
-                    placeholder="New Password"
-                    id="newPassword"
-                  />
                 </div>
-              </div>
 
-              <div class="form-group pass_show">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">
-                      <i class="fas fa-key"></i>
-                    </span>
+                <div class="form-group pass_show">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="fas fa-key"></i>
+                      </span>
+                    </div>
+                    <input
+                      class="form-control"
+                      type="password"
+                      placeholder="Confirm Password"
+                      id="confirmPassword"
+                      required
+                    />
                   </div>
-                  <input
-                    class="form-control"
-                    type="password"
-                    placeholder="Confirm Password"
-                    id="confirmPassword"
-                  />
                 </div>
-              </div>
+                <div class="text-right">
+                  <button class="btn btn-primary icon-btn-save" type="submit">
+                    <span class="btn-save-label">
+                      <i class="fas fa-save"></i>
+                    </span>
+                    Save
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-        <div class="card-footer text-right">
-          <button class="btn btn-primary icon-btn-save" type="submit">
-            <span class="btn-save-label">
-              <i class="fas fa-save"></i>
-            </span>
-            Save
-          </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <script>
+  async function user() {
+    try {
+      const response = await $.ajax({
+        url: "/api/user",
+        method: "GET",
+        dataType: "json",
+      });
+
+      $("#employeeId").text(`Employee ID: ${response.employee_id}`);
+      return response.employee_id;
+    } catch (error) {
+      console.error("Hata:", error);
+      return null;
+    }
+  }
   $(document).ready(function () {
     $(".pass_show").append('<span class="ptxt">Show</span>');
 
     $(document).on("click", ".pass_show .ptxt", function () {
       $(this).text($(this).text() === "Show" ? "Hide" : "Show");
-
       $(this)
-        .prev("input")
+        .prev("div")
+        .find("input")
         .attr("type", function (index, attr) {
           return attr === "password" ? "text" : "password";
         });
+    });
+
+    $("#changePasswordForm").on("submit", async function (event) {
+      event.preventDefault();
+
+      const currentPassword = $("#currentPassword").val();
+      const newPassword = $("#newPassword").val();
+      const confirmPassword = $("#confirmPassword").val();
+
+      if (newPassword !== confirmPassword) {
+        showToast("New password and confirm password", "do not match.");
+        return;
+      }
+
+      try {
+        const userId = await user();
+        const url = "/change-password/" + userId;
+
+        $.ajax({
+          url: url,
+          method: "PATCH",
+          contentType: "application/json",
+          data: JSON.stringify({
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          }),
+          success: function (result) {
+            console.log("Response:", result);
+            showToast("Şifre Değiştirme", "Başarı ile Gerçekleşti");
+          },
+          error: function (xhr, status, error) {
+            console.log("Error:", xhr.responseText);
+            alert(
+              "Şifre değiştirme sırasında bir hata oluştu: " + xhr.responseText
+            );
+          },
+        });
+      } catch (error) {
+        console.error("Error while fetching user ID:", error);
+      }
     });
   });
 </script>

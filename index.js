@@ -91,6 +91,35 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
     res.render("register", { layout: false });
 });
+app.patch('/change-password/:id', async (req, res) => {
+    console.log("Request body:", req.body);
+    const id = req.params.id;
+    const { currentPassword, newPassword } = req.body;
+
+    try {
+        const result = await db.query("SELECT * FROM employees WHERE employee_id = $1", [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const user = result.rows[0];
+
+        // Mevcut şifreyi kontrol ediyoruz
+        const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Current password is incorrect" });
+        }
+
+        // Yeni şifreyi hash'leyip güncelliyoruz
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await db.query("UPDATE employees SET password_hash = $1 WHERE employee_id = $2", [hashedNewPassword, id]);
+
+        return res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "An error occurred while changing the password" });
+    }
+});
+
 
 app.get("/logout", (req, res) => {
     req.logout(function (err) {
@@ -105,7 +134,7 @@ app.use("/user", userRoutes);
 app.use('/admin', adminRoutes);
 app.use("/", authRoutes);
 app.use((req, res, next) => {
-    res.status(404).render('error404', { layout: false }); // views/404.ejs sayfasını render eder
+    res.status(404).render('error404', { layout: false });
 });
 
 app.listen(port, () => {

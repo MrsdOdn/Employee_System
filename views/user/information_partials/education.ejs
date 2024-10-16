@@ -1,0 +1,143 @@
+<div class="container-xl px-4 mt-4">
+  <hr class="mt-0 mb-4" />
+  <div class="row">
+    <div class="col-xl-12">
+      <div class="card mb-4 black-backend">
+        <div class="card-header">Eğitim Bilgileri Detay</div>
+        <div class="card-body">
+          <form>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputInstitutionType"
+                  >Eğitim Kurumu Türü</label
+                >
+                <input
+                  class="form-control"
+                  id="inputInstitutionType"
+                  type="text"
+                  placeholder="Eğitim kurumu türünü giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputInstitutionName"
+                  >Eğitim Kurumu Adı</label
+                >
+                <input
+                  class="form-control"
+                  id="inputInstitutionName"
+                  type="text"
+                  placeholder="Eğitim kurumu adını giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputDepartments">Bölüm</label>
+                <input
+                  class="form-control"
+                  id="inputDepartments"
+                  type="text"
+                  placeholder="Bölüm giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputStartYear"
+                  >Başlangıç Yılı</label
+                >
+                <input
+                  class="form-control"
+                  id="inputStartYear"
+                  type="number"
+                  placeholder="Başlangıç yılını giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputEndYear">Bitiş Yılı</label>
+                <input
+                  class="form-control"
+                  id="inputEndYear"
+                  type="number"
+                  placeholder="Bitiş yılını giriniz"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputDegree">Derece</label>
+                <input
+                  class="form-control"
+                  id="inputDegree"
+                  type="text"
+                  placeholder="Derece giriniz"
+                />
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-education-change" type="button">
+              Değişiklikleri Kaydet
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    async function initialize() {
+      try {
+        const userId = await user();
+        const url = "/user/api/education/" + userId;
+
+        const data = await $.ajax({
+          url: url,
+          method: "GET",
+        });
+
+        $("#inputInstitutionType").val(data.institution_type);
+        $("#inputInstitutionName").val(data.institution_name);
+        $("#inputDepartments").val(data.department);
+        $("#inputStartYear").val(data.start_year);
+        $("#inputEndYear").val(data.end_year);
+        $("#inputDegree").val(data.degree);
+        console.log(data.department);
+      } catch (error) {
+        console.error("Hata oluştu:", error);
+      }
+    }
+
+    initialize();
+
+    $(".btn-education-change").click(async function () {
+      const updatedData = {
+        institution_type: $("#inputInstitutionType").val(),
+        institution_name: $("#inputInstitutionName").val(),
+        department: $("#inputDepartments").val(),
+        start_year: $("#inputStartYear").val(),
+        end_year: $("#inputEndYear").val(),
+        degree: $("#inputDegree").val(),
+      };
+
+      try {
+        const userId = await user();
+        const url = "/user/api/education/" + userId;
+
+        await $.ajax({
+          type: "PATCH",
+          url: url,
+          data: JSON.stringify(updatedData),
+          contentType: "application/json",
+          success: function () {
+            showToast("Eğitim Bilgileri", "Başarı ile değiştirildi!");
+            initialize();
+          },
+        });
+      } catch (jqXHR) {
+        console.error("Hata:", jqXHR.status, jqXHR.statusText);
+        showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+      }
+    });
+  });
+</script>

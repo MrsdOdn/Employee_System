@@ -1,4 +1,3 @@
-<%- include("../../partials/image_upload.ejs") %>
 <div class="container-xl px-4 mt-4">
   <hr class="mt-0 mb-4" />
   <div class="row">
@@ -7,6 +6,7 @@
         <div class="card-header">İletişim Bilgiler Detay</div>
         <div class="card-body">
           <form>
+            <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="small mb-1" for="inputAddressType"
                   >Adres Tipi</label
@@ -16,6 +16,17 @@
                   id="inputAddressType"
                   type="text"
                   placeholder="Adres tipi giriniz"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputEmergencyContact"
+                  >Acil İletişim Bilgisi</label
+                >
+                <input
+                  class="form-control"
+                  id="inputEmergencyContact"
+                  type="text"
+                  placeholder="Acil iletişim giriniz"
                 />
               </div>
 
@@ -39,7 +50,7 @@
                 />
               </div>
 
-              <div class="col-md-6 mb-3">
+              <div class="col-md-12 mb-3">
                 <label class="small mb-1" for="inputFullAddress"
                   >Tam Adres</label
                 >
@@ -50,22 +61,13 @@
                 ></textarea>
               </div>
 
-              <div class="col-md-6 mb-3">
-                <label class="small mb-1" for="inputEmergencyContact"
-                  >Acil İletişim</label
-                >
-                <input
-                  class="form-control"
-                  id="inputEmergencyContact"
-                  type="text"
-                  placeholder="Acil iletişim giriniz"
-                />
-              </div>
+              
             </div>
-
-            <button class="btn btn-primary btn-user-change" type="button">
+            </div>
+            <button class="btn btn-primary btn-contact-change" type="button">
               Değişiklikleri Kaydet
             </button>
+         
           </form>
         </div>
       </div>
@@ -96,7 +98,7 @@
 
     initialize();
 
-    $(".btn-user-change").click(async function () {
+    $(".btn-contact-change").click(async function () {
       const updatedData = {
         address_type: $("#inputAddressType").val(),
         city: $("#inputCity").val(),
@@ -104,18 +106,22 @@
         full_address: $("#inputFullAddress").val(),
         emergency_contact: $("#inputEmergencyContact").val(),
       };
-
       try {
         const userId = await user();
-        await $.ajax({
-          url: "/user/api/contact/" + userId,
-          method: "PATCH",
-          contentType: "application/json",
+        const url = "/user/api/contact/" + userId;
+        const response = await $.ajax({
+          type: "PATCH",
+          url: url,
           data: JSON.stringify(updatedData),
+          contentType: "application/json",
+          success: function (data) {
+            showToast("Kişisel Bilgiler", "Başarı ile değiştirildi!");
+            initialize();
+          },
         });
-        alert("Bilgiler güncellendi.");
-      } catch (error) {
-        console.error("Güncelleme sırasında hata oluştu:", error);
+      } catch (jqXHR) {
+        console.error("Hata:", jqXHR.status, jqXHR.statusText);
+        showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
       }
     });
   });

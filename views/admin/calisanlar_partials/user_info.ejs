@@ -1,3 +1,4 @@
+<%- include("./modal/user_modal.ejs") %>
 <div class="container mb-3">
   <table id="employees" class="display" style="width: 100%">
     <thead>
@@ -35,6 +36,52 @@
     }
     return text;
   }
+  function loadRoles() {
+    $.ajax({
+      url: "/admin/api/roller",
+      method: "GET",
+      success: function (roles) {
+        const userRoleSelect = $("#user_role");
+        userRoleSelect.empty();
+        userRoleSelect.append('<option value="">Yetki Seçin</option>');
+        roles.forEach((role) => {
+          userRoleSelect.append(
+            `<option value="${role.role_id}">${role.role_name}</option>`
+          );
+        });
+      },
+      error: function (err) {
+        console.error("Roller alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+  $("#profileModal").on("show.bs.modal", function () {
+    loadRoles();
+  });
+  function edit(apiUrl, userId) {
+    $.ajax({
+      url: apiUrl, // API URL'sini güncelle
+      method: "GET",
+      success: function (data) {
+        console.log(data);
+        // Modal alanlarını doldur
+        $("#first_name").val(data.first_name).attr("readonly", true);
+        $("#last_name").val(data.last_name).attr("readonly", true);
+        $("#email").val(data.email).attr("readonly", true);
+        $("#phone_number").val(data.phone_number).attr("readonly", true);
+        $("#user_role").val(data.role_id);
+        $("#profile_image").attr(
+          "src",
+          "../../" + data.profile_image || "default.jpg"
+        );
+
+        $("#profileModal").modal("show");
+      },
+      error: function (err) {
+        console.error("Kullanıcı bilgileri alınırken bir hata oluştu.", err);
+      },
+    });
+  }
 
   $(document).ready(function () {
     var table = $("#employees").DataTable({
@@ -68,7 +115,7 @@
         {
           data: "employee_id",
           render: function (data, type, row) {
-            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/user/${data}', '${data}')">
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/user_modal/${data}', '${data}')">
                     <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
                     <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/user/${data}', ${data},'#employees')">
                     <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
@@ -142,7 +189,6 @@
           });
       },
     });
-
 
     $('[data-toggle="tooltip"]').tooltip();
   });

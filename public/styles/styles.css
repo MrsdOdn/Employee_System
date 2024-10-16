@@ -206,6 +206,13 @@ table.dataTable tfoot th {
     font-size: 2rem;
     margin-left: 5px;
 }
+/*Modal index*/
+#imageUploadModal{
+    z-index: 1060;
+}
+#profileModal{
+    z-index: 1050;
+}
 
 /*Şifre değiştirme alanı css*/
 .pass_show {

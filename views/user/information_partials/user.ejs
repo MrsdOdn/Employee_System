@@ -119,7 +119,7 @@
       }
     }
 
-    initialize(); // Asenkron fonksiyonu başlat
+    initialize();
 
     $(".btn-user-change").click(async function () {
       const updatedData = {
@@ -141,11 +141,7 @@
           data: JSON.stringify(updatedData),
           contentType: "application/json",
           success: function (data) {
-            $("#inputTcNo").val(data.tc_no);
-            $("#inputFirstName").val(data.first_name);
-            $("#inputLastName").val(data.last_name);
-            $("#inputEmailAddress").val(data.email);
-            $("#inputPhone").val(data.phone_number);
+            initialize();
             $("body > div.container > div.navigation > ul > li:nth-child(1) > a > span").text(data.first_name +" "+ data.last_name);
             showToast("Profil Bilgileri", "Başarı ile değiştirildi!");
           },

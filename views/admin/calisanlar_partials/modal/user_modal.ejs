@@ -1,14 +1,14 @@
+<%- include("../../../partials/image_upload.ejs") %>
 <div
-  class="modal show"
+  class="modal fade"
   id="profileModal"
   tabindex="-1"
   role="dialog"
   aria-labelledby="profileModalLabel"
   aria-hidden="true"
-  style="display: block"
 >
   <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
+    <div class="modal-content black-backend">
       <div class="modal-header">
         <h5 class="modal-title" id="profileModalLabel">Employee Profile</h5>
         <button
@@ -29,18 +29,20 @@
               <div>
                 <img
                   id="profile_image"
-                  class="img-fluid rounded mb-2"
-                  src=""
-                  alt="Profile Image"
-                  style="max-width: 100%; height: auto"
+                  class="img-account-profile rounded-circle mb-2"
+                  src="http://bootdey.com/img/Content/avatar/avatar1.png"
+                  alt="profile image"
                 />
+                <div class="small font-italic text-muted mb-4">
+                  JPG or PNG no larger than 1 MB
+                </div>
                 <button
                   type="button"
-                  class="btn btn-primary btn-block mt-2"
+                  class="btn btn-primary"
                   data-toggle="modal"
                   data-target="#imageUploadModal"
                 >
-                  Upload Image
+                  Yeni Resim Yükle
                 </button>
               </div>
             </div>
@@ -88,6 +90,15 @@
                     readonly
                   />
                 </div>
+                <div class="mb-3">
+                  <label for="user_role" class="form-label"
+                    >Kullanıcı Yetkisi</label
+                  >
+                  <select class="form-control" id="user_role" readonly>
+                    <option value="">Yetki Seçin</option>
+                    <!-- Backend'den alınacak seçenekler burada dinamik olarak eklenecek -->
+                  </select>
+                </div>
                 <button type="button" class="btn btn-primary" id="editBtn">
                   Edit
                 </button>
@@ -115,58 +126,42 @@
     </div>
   </div>
 </div>
-<!-- jQuery CDN -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  $(document).ready(async function () {
-    const employeeData = {};
-    const userId = await user();
-    const url = "/user/api/user/" + userId;
-
+  function edit(apiUrl, userId) {
     $.ajax({
-      url: url,
+      url: apiUrl,
       method: "GET",
       success: function (data) {
-        employeeData.tc_no = data.tc_no;
-        employeeData.first_name = data.first_name;
-        employeeData.last_name = data.last_name;
-        employeeData.email = data.email;
-        employeeData.phone_number = data.phone_number;
-        employeeData.profile_image = data.profile_image;
-        console.log("Kişi bilgileri başarıyla alındı:", employeeData);
+        // Populate modal fields with the retrieved data
+        $("#first_name").val(data.first_name).attr("readonly", true);
+        $("#last_name").val(data.last_name).attr("readonly", true);
+        $("#email").val(data.email).attr("readonly", true);
+        $("#phone_number").val(data.phone_number).attr("readonly", true);
+        $("#user_role").val(data.user_role).attr("readonly", true);
+        $("#profile_image").attr("src", data.profile_image);
+
+        // Show the modal
+        $("#profileModal").modal("show");
       },
       error: function (err) {
-        console.error("Kişi bilgisi alınırken bir hata oluştu.", err);
+        console.error("Kullanıcı bilgileri alınırken bir hata oluştu.", err);
       },
     });
-    $("#tc_no").val(employeeData.tc_no);
-    $("#first_name").val(employeeData.first_name);
-    $("#last_name").val(employeeData.last_name);
-    $("#email").val(employeeData.email);
-    $("#phone_number").val(employeeData.phone_number);
-    $("#profile_image").attr("src", employeeData.profile_image);
+  }
 
+  $(document).ready(function () {
     $("#editBtn").click(function () {
       $("input").removeAttr("readonly");
-      $("#profile_image_upload").show();
+      $("#user_role").removeAttr("readonly");
       $("#editBtn").hide();
       $("#saveBtn, #cancelBtn").show();
     });
 
-    // Cancel Button
     $("#cancelBtn").click(function () {
       $("input").attr("readonly", true);
-      $("#profile_image_upload").hide();
+      $("#user_role").attr("readonly", true); 
       $("#saveBtn, #cancelBtn").hide();
       $("#editBtn").show();
-    });
-    $(".close").click(function () {
-      $("#profileModal").modal("hide");
-    });
-    $(document).on('click', function (e) {
-      if ($(e.target).closest('#profileModal').length === 0) {
-        $("#profileModal").modal('hide');
-      }
     });
 
     $("#employeeForm").submit(function (event) {
@@ -177,16 +172,28 @@
         last_name: $("#last_name").val(),
         email: $("#email").val(),
         phone_number: $("#phone_number").val(),
-        profile_image: $("#profile_image_upload")[0].files[0],
+        profile_image: $("#profile_image").attr("src"),
+        user_role: $("#user_role").val(),
       };
 
-      console.log("Updated Data:", updatedData);
-
-      // Perform PATCH request here (via AJAX or Fetch API)
+      $.ajax({
+        url: "/admin/api/calisanlar/user/" + userId, // Ensure you use the correct URL
+        method: "PATCH",
+        data: JSON.stringify(updatedData),
+        contentType: "application/json",
+        success: function () {
+          alert("Bilgiler başarıyla güncellendi.");
+          $("#profileModal").modal("hide"); // Hide modal on success
+          // Optionally refresh the DataTable to reflect changes
+        },
+        error: function (err) {
+          console.error("Bilgiler güncellenirken bir hata oluştu.", err);
+        },
+      });
 
       $("input").attr("readonly", true);
-      $("#profile_image_upload").hide();
-      $("#saveBtn, #cancelBtn").hide(); 
+      $("#user_role").attr("readonly", true);
+      $("#saveBtn, #cancelBtn").hide();
       $("#editBtn").show();
     });
   });

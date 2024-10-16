@@ -80,6 +80,24 @@
     </button>
   </div>
 </nav>
+<div
+  class="tab-pane fade"
+  id="nav-education"
+  role="tabpanel"
+  aria-labelledby="nav-education-tab"
+  tabindex="0"
+>
+  <%- include("./information_partials/education.ejs") %>
+</div>
+<div
+  class="tab-pane fade"
+  id="nav-body"
+  role="tabpanel"
+  aria-labelledby="nav-body-tab"
+  tabindex="0"
+>
+  <%- include("./information_partials/body.ejs") %>
+</div>
 
 <div
   class="tab-pane fade show active"
@@ -118,24 +136,7 @@
   <%- include("./information_partials/contact.ejs") %>
 </div>
 
-<div
-  class="tab-pane fade"
-  id="nav-education"
-  role="tabpanel"
-  aria-labelledby="nav-education-tab"
-  tabindex="0"
->
-  <%- include("./information_partials/education.ejs") %>
-</div>
-<div
-  class="tab-pane fade"
-  id="nav-body"
-  role="tabpanel"
-  aria-labelledby="nav-body-tab"
-  tabindex="0"
->
-  <%- include("./information_partials/body.ejs") %>
-</div>
+
 
 <script>
   async function user() {

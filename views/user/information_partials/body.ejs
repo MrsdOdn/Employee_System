@@ -1,0 +1,157 @@
+<div class="container-xl px-4 mt-4">
+  <hr class="mt-0 mb-4" />
+  <div class="row">
+    <div class="col-xl-12">
+      <div class="card mb-4 black-backend">
+        <div class="card-header">Beden Ölçüleri Detay</div>
+        <div class="card-body">
+          <form>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputShoeSize"
+                  >Ayakkabı Numarası</label
+                >
+                <input
+                  class="form-control"
+                  id="inputShoeSize"
+                  type="number"
+                  min="35"
+                  max="50"
+                  step="0.5"
+                  placeholder="Ayakkabı numarası seçiniz"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputClothingSize"
+                  >Giysi Beden</label
+                >
+                <select class="form-control" id="inputClothingSize">
+                  <option value="">Giysi bedeni seçiniz</option>
+                  <option value="XS">XS</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputPantSize"
+                  >Pantolon Beden</label
+                >
+                <input
+                  class="form-control"
+                  id="inputPantSize"
+                  type="number"
+                  min="28"
+                  max="44"
+                  step="1"
+                  placeholder="Pantolon bedeni seçiniz"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputCoatSize"
+                  >Ceket Beden</label
+                >
+                <select class="form-control" id="inputCoatSize">
+                  <option value="">Ceket bedeni seçiniz</option>
+                  <option value="XS">XS</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputGloveSize"
+                  >Eldiven Beden</label
+                >
+                <select class="form-control" id="inputGloveSize">
+                  <option value="">Eldiven bedeni seçiniz</option>
+                  <option value="XS">XS</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="small mb-1" for="inputHelmetSize"
+                  >Kask Beden</label
+                >
+                <select class="form-control" id="inputHelmetSize">
+                  <option value="">Kask bedeni seçiniz</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-body-change" type="button">
+              Değişiklikleri Kaydet
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    async function initialize() {
+      try {
+        const userId = await user();
+        const url = "/user/api/body/" + userId;
+
+        const data = await $.ajax({
+          url: url,
+          method: "GET",
+        });
+
+        $("#inputShoeSize").val(data.shoe_size);
+        $("#inputClothingSize").val(data.clothing_size);
+        $("#inputPantSize").val(data.pant_size);
+        $("#inputCoatSize").val(data.coat_size);
+        $("#inputGloveSize").val(data.glove_size);
+        $("#inputHelmetSize").val(data.helmet_size);
+      } catch (error) {
+        console.error("Hata oluştu:", error);
+      }
+    }
+
+    initialize();
+
+    $(".btn-body-change").click(async function () {
+      const updatedData = {
+        shoe_size: $("#inputShoeSize").val(),
+        clothing_size: $("#inputClothingSize").val(),
+        pant_size: $("#inputPantSize").val(),
+        coat_size: $("#inputCoatSize").val(),
+        glove_size: $("#inputGloveSize").val(),
+        helmet_size: $("#inputHelmetSize").val(),
+      };
+
+      try {
+        const userId = await user();
+        const url = "/user/api/body/" + userId;
+        const response = await $.ajax({
+          type: "PATCH",
+          url: url,
+          data: JSON.stringify(updatedData),
+          contentType: "application/json",
+          success: function (data) {
+            showToast("Beden Ölçüleri Bilgiler", "Başarı ile değiştirildi!");
+            initialize();
+          },
+        });
+      } catch (jqXHR) {
+        console.error("Hata:", jqXHR.status, jqXHR.statusText);
+        showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+      }
+    });
+  });
+</script>

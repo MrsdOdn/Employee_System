@@ -18,6 +18,24 @@ const upload = multer({
     limits: { fileSize: 1 * 1024 * 1024 } // 1 MB sınırı
 });
 const user_info_sql = 'SELECT * FROM employees';
+const user_info_modal_sql = `
+SELECT 
+    e.employee_id,
+    e.first_name,
+    e.last_name,
+    e.email,
+    e.phone_number,
+    r.role_name,
+    e.profile_image
+FROM 
+    employees e
+LEFT JOIN 
+    employee_roles er ON e.employee_id = er.employee_id
+LEFT JOIN 
+    roles r ON er.role_id = r.role_id
+WHERE 
+    e.employee_id = $1
+`;
 const job_info_sql = `SELECT 
             e.employee_id,
             e.first_name,
@@ -248,11 +266,25 @@ router.get("/api/calisanlar/user", async (req, res) => {
 });
 router.get("/api/calisanlar/user/:id", async (req, res) => {
     const id = req.params.id;
-    const e_id = ` WHERE employees.employee_id = $1`;
-    const userById_sql = user_info_sql + e_id;
+    const userById_sql = user_info_sql;
 
     try {
         const result = await db.query(userById_sql, [id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisanlar/user_modal/:id", async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const result = await db.query(user_info_modal_sql, [id]); // Direkt sorgu
         if (result.rows.length > 0) {
             res.json(result.rows[0]);
         } else {
@@ -331,10 +363,8 @@ router.patch("/api/calisanlar/user/:id", async (req, res) => {
 });
 router.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {
-        // Multer hatası
         return res.status(500).json({ error: "Multer hatası: " + err.message });
     } else if (err) {
-        // Diğer hatalar
         return res.status(500).json({ error: "Hata: " + err.message });
     }
     next();
@@ -357,6 +387,17 @@ router.delete('/api/calisanlar/user/:id', async (req, res) => {
         return res.status(500).json({ error: 'İç Sunucu Hatası', details: error.message });
     }
 });
+
+router.get("/api/roller", async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM roles');
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 router.get("/api/calisanlar/job", async (req, res) => {
     try {
