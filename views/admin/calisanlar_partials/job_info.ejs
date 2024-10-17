@@ -1,3 +1,4 @@
+<%- include("./modal/job_modal.ejs") %>
 <div class="tab-content" id="nav-tabContent">
   <table id="job-info" class="display" style="width: 100%">
     <thead>
@@ -36,6 +37,176 @@
   </table>
 </div>
 <script>
+  function loadJobTitles() {
+    $.ajax({
+      url: "/admin/api/is_unvanlari",
+      method: "GET",
+      success: function (titles) {
+        const jobTitleSelect = $("#jobTitle");
+        jobTitleSelect.empty();
+        jobTitleSelect.append('<option value="">İş Unvanı Seçin</option>');
+        titles.forEach((title) => {
+          jobTitleSelect.append(
+            `<option value="${title.id}">${title.title_name}</option>`
+          );
+        });
+      },
+      error: function (err) {
+        console.error("İş unvanları alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
+  function loadJobTasks() {
+    $.ajax({
+      url: "/admin/api/gorevler",
+      method: "GET",
+      success: function (tasks) {
+        const jobTaskSelect = $("#jobTask");
+        jobTaskSelect.empty();
+        jobTaskSelect.append('<option value="">Görev Seçin</option>');
+        tasks.forEach((task) => {
+          jobTaskSelect.append(
+            `<option value="${task.id}">${task.task_name}</option>`
+          );
+        });
+      },
+      error: function (err) {
+        console.error("Görevler alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
+  function loadDepartments() {
+    $.ajax({
+      url: "/admin/api/bolumler", // Doğru URL'yi kontrol edin
+      method: "GET",
+      success: function (departments) {
+        const departmentSelect = $("#department");
+        departmentSelect.empty();
+        departmentSelect.append('<option value="">Bölüm Seçin</option>');
+        departments.forEach((department) => {
+          departmentSelect.append(
+            `<option value="${department.id}">${department.department_name}</option>`
+          );
+        });
+      },
+      error: function (err) {
+        console.error("Bölümler alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
+  function loadDivisions() {
+    $.ajax({
+      url: "/admin/api/birlikler",
+      method: "GET",
+      success: function (divisions) {
+        const divisionSelect = $("#division");
+        divisionSelect.empty();
+        divisionSelect.append('<option value="">Birlik Seçin</option>');
+        divisions.forEach((division) => {
+          divisionSelect.append(
+            `<option value="${division.id}">${division.division_name}</option>`
+          );
+        });
+      },
+      error: function (err) {
+        console.error("Birlikler alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+  function loadEmployeeTypes() {
+    $.ajax({
+      url: "/admin/api/calisan_turleri",
+      method: "GET",
+      success: function (types) {
+        const employeeTypeSelect = $("#employeeType");
+        employeeTypeSelect.empty();
+        employeeTypeSelect.append(
+          '<option value="">Çalışan Türü Seçin</option>'
+        );
+        types.forEach((type) => {
+          employeeTypeSelect.append(
+            `<option value="${type.id}">${type.type_name}</option>`
+          );
+        });
+      },
+      error: function (err) {
+        console.error("Çalışan türleri alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
+  function loadGroups() {
+    $.ajax({
+      url: "/admin/api/gruplar",
+      method: "GET",
+      success: function (groups) {
+        const groupSelect = $("#groupName");
+        groupSelect.empty();
+        groupSelect.append('<option value="">Grup Adı Seçin</option>');
+        groups.forEach((group) => {
+          groupSelect.append(
+            `<option value="${group.id}">${group.group_name}</option>`
+          );
+        });
+      },
+      error: function (err) {
+        console.error("Gruplar alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
+  $("#jobInfoModal").on("show.bs.modal", function () {
+    loadJobTitles();
+    loadJobTasks();
+    loadDepartments();
+    loadDivisions();
+    loadEmployeeTypes();
+    loadGroups();
+  });
+  function editJob(apiUrl, jobId) {
+    console.log(apiUrl, jobId);
+    userid = jobId;
+
+    $.ajax({
+      url: apiUrl,
+      method: "GET",
+      success: function (data) {
+        console.log(data);
+        $("#modalInputEmployeeId").val(data.employee_id);
+        $("#modalInputFirstName").val(data.first_name);
+        $("#modalInputLastName").val(data.last_name);
+        $("#modalInputTitle").val(data.title);
+        $("#modalInputTask").val(data.task);
+        $("#modalInputDivision").val(data.division);
+        $("#modalInputDepartment").val(data.department);
+        $("#modalInputJobDescription").val(data.job_description);
+        $("#modalInputEmployeeType").val(data.employee_type);
+        $("#modalInputGroupName").val(data.group_name || "");
+        const employmentStartDate = new Date(data.employment_start_date);
+        const formattedStartDate = employmentStartDate
+          .toISOString()
+          .split("T")[0];
+        $("#modalInputEmploymentStartDate").val(formattedStartDate);
+        const terminationDate = data.termination_date
+          ? new Date(data.termination_date)
+          : null;
+        const formattedTerminationDate = terminationDate
+          ? terminationDate.toISOString().split("T")[0]
+          : "";
+        $("#modalInputTerminationDate").val(formattedTerminationDate);
+
+        $("#jobInfoModal").modal("show");
+      },
+      error: function (err) {
+        showToast("İş bilgileri alınırken", "Bir hata oluştu");
+        console.error("İş bilgileri alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
   $(document).ready(function () {
     var table = $("#job-info").DataTable({
       ajax: {
@@ -82,7 +253,7 @@
         {
           data: "employee_id",
           render: function (data, type, row) {
-            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/job/${data}', '${data}')">
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="editJob('/admin/api/calisanlar/job/${data}', '${data}')">
                     <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
                     <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/job/${data}', ${data},'#job-info')">
                     <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;

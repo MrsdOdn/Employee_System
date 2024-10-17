@@ -89,7 +89,7 @@
   async function user() {
     try {
       const response = await $.ajax({
-        url: "/api/user",
+        url: "/api/user", // Doğru URL'yi kullandığınızdan emin olun
         method: "GET",
         dataType: "json",
       });
@@ -101,6 +101,7 @@
       return null;
     }
   }
+
   $(document).ready(function () {
     $(".pass_show").append('<span class="ptxt">Show</span>');
 
@@ -122,22 +123,24 @@
       const confirmPassword = $("#confirmPassword").val();
 
       if (newPassword !== confirmPassword) {
-        showToast("New password and confirm password", "do not match.");
+        showToast("Yeni şifre ve onay şifre uyuşmuyor.");
         return;
       }
+      
 
       try {
         const userId = await user();
-        const url = "/change-password/" + userId;
+        const url = `/user/api/user/${userId}`;
+        const password = {
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        };
 
         $.ajax({
           url: url,
           method: "PATCH",
           contentType: "application/json",
-          data: JSON.stringify({
-            currentPassword: currentPassword,
-            newPassword: newPassword,
-          }),
+          data: JSON.stringify(password),
           success: function (result) {
             console.log("Response:", result);
             showToast("Şifre Değiştirme", "Başarı ile Gerçekleşti");
@@ -150,7 +153,7 @@
           },
         });
       } catch (error) {
-        console.error("Error while fetching user ID:", error);
+        console.error("Kullanıcı ID'sini alırken hata oluştu:", error);
       }
     });
   });

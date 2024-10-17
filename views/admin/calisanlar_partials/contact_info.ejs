@@ -1,3 +1,4 @@
+<%- include("./modal/contact_modal.ejs") %>
 <div class="container mb-3">
   <table id="contact_info" class="display" style="width: 100%">
     <thead>
@@ -35,6 +36,33 @@
     }
     return text;
   }
+
+  function editContact(apiUrl, userId) {
+    console.log(apiUrl, userId);
+    userid = userId;
+    console.log(userid);
+    $.ajax({
+      url: apiUrl,
+      method: "GET",
+      success: function (data) {
+        console.log(data);
+        $(userid).val(data.contact_id);
+
+        $("#modalInputAddressType").val(data.address_type);
+        $("#modalInputCity").val(data.city);
+        $("#modalInputState").val(data.state);
+        $("#modalInputFullAddress").val(data.full_address);
+        $("#modalInputEmergencyContact").val(data.emergency_contact);
+
+        $("#editContactModal").modal("show");
+      },
+      error: function (err) {
+        console.error("Kullanıcı bilgileri alınırken bir hata oluştu.", err);
+        showToast("Kullanıcı bilgileri alınırken", "Bir hata oluştu");
+      },
+    });
+  }
+
   $(document).ready(function () {
     var table = $("#contact_info").DataTable({
       ajax: {
@@ -82,7 +110,7 @@
         {
           data: "employee_id",
           render: function (data) {
-            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/contact/${data}', '${data}')">
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="editContact('/admin/api/calisanlar/contact/${data}', '${data}')">
                     <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
                     <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/contact/${data}', ${data},'#contact_info')">
                     <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;

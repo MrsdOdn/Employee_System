@@ -58,13 +58,16 @@
   $("#profileModal").on("show.bs.modal", function () {
     loadRoles();
   });
+
   function edit(apiUrl, userId) {
+    console.log(apiUrl, userId);
+    userid = userId;
+    console.log(userid);
     $.ajax({
-      url: apiUrl, // API URL'sini güncelle
+      url: apiUrl,
       method: "GET",
       success: function (data) {
         console.log(data);
-        // Modal alanlarını doldur
         $("#first_name").val(data.first_name).attr("readonly", true);
         $("#last_name").val(data.last_name).attr("readonly", true);
         $("#email").val(data.email).attr("readonly", true);
@@ -74,10 +77,10 @@
           "src",
           "../../" + data.profile_image || "default.jpg"
         );
-
         $("#profileModal").modal("show");
       },
       error: function (err) {
+        showToast("Kullanıcı bilgileri alınırken", "Bir hata oluştu");
         console.error("Kullanıcı bilgileri alınırken bir hata oluştu.", err);
       },
     });
@@ -115,10 +118,12 @@
         {
           data: "employee_id",
           render: function (data, type, row) {
-            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/user_modal/${data}', '${data}')">
-                    <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
-                    <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/user/${data}', ${data},'#employees')">
-                    <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
+            return `
+            <a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/user_modal/${data}', '${data}')" data-toggle="tooltip" title="Düzenle">
+             <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
+            </a>
+            <a href="#" class="btn btn-danger btn-sm" onclick="confirmDelete('/admin/api/calisanlar/user/${data}', ${data},'#employees')" data-toggle="tooltip" title="Sil">
+             <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
           },
         },
       ],

@@ -127,28 +127,6 @@
   </div>
 </div>
 <script>
-  function edit(apiUrl, userId) {
-    $.ajax({
-      url: apiUrl,
-      method: "GET",
-      success: function (data) {
-        // Populate modal fields with the retrieved data
-        $("#first_name").val(data.first_name).attr("readonly", true);
-        $("#last_name").val(data.last_name).attr("readonly", true);
-        $("#email").val(data.email).attr("readonly", true);
-        $("#phone_number").val(data.phone_number).attr("readonly", true);
-        $("#user_role").val(data.user_role).attr("readonly", true);
-        $("#profile_image").attr("src", data.profile_image);
-
-        // Show the modal
-        $("#profileModal").modal("show");
-      },
-      error: function (err) {
-        console.error("Kullanıcı bilgileri alınırken bir hata oluştu.", err);
-      },
-    });
-  }
-
   $(document).ready(function () {
     $("#editBtn").click(function () {
       $("input").removeAttr("readonly");
@@ -159,7 +137,7 @@
 
     $("#cancelBtn").click(function () {
       $("input").attr("readonly", true);
-      $("#user_role").attr("readonly", true); 
+      $("#user_role").attr("readonly", true);
       $("#saveBtn, #cancelBtn").hide();
       $("#editBtn").show();
     });
@@ -171,23 +149,23 @@
         first_name: $("#first_name").val(),
         last_name: $("#last_name").val(),
         email: $("#email").val(),
-        phone_number: $("#phone_number").val(),
-        profile_image: $("#profile_image").attr("src"),
+        phone: $("#phone_number").val(),
         user_role: $("#user_role").val(),
       };
-
+      console.log(updatedData);
       $.ajax({
-        url: "/admin/api/calisanlar/user/" + userId, // Ensure you use the correct URL
+        url: "/admin/api/calisanlar/user/" + userid,
         method: "PATCH",
         data: JSON.stringify(updatedData),
         contentType: "application/json",
         success: function () {
-          alert("Bilgiler başarıyla güncellendi.");
-          $("#profileModal").modal("hide"); // Hide modal on success
-          // Optionally refresh the DataTable to reflect changes
+          showToast("Bilgiler", "Güncellendi");
+          $("#profileModal").modal("hide");
+          $("#employees").DataTable().ajax.reload(null, false);
         },
-        error: function (err) {
-          console.error("Bilgiler güncellenirken bir hata oluştu.", err);
+        error: function (jqXHR) {
+          showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+          console.error("Bilgiler güncellenirken bir hata oluştu.", jqXHR);
         },
       });
 

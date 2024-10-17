@@ -26,6 +26,7 @@ SELECT
     e.email,
     e.phone_number,
     r.role_name,
+    r.role_id,
     e.profile_image
 FROM 
     employees e
@@ -40,12 +41,19 @@ const job_info_sql = `SELECT
             e.employee_id,
             e.first_name,
             e.last_name,
+            jt.id,
             jt.title_name AS title,
+            jta.id,
             jta.task_name AS task,
+            d.id,
             d.division_name AS division,
+            dept.id,
             dept.department_name AS department,
+            jd.id,
             jd.description AS job_description,
+            et.id,
             et.type_name AS employee_type,
+            g.id,
             g.group_name AS group_name,
             ep.employment_start_date,
             ep.termination_date
@@ -266,7 +274,7 @@ router.get("/api/calisanlar/user", async (req, res) => {
 });
 router.get("/api/calisanlar/user/:id", async (req, res) => {
     const id = req.params.id;
-    const userById_sql = user_info_sql;
+    const userById_sql = user_info_sql + " WHERE employee_id = $1";
 
     try {
         const result = await db.query(userById_sql, [id]);
@@ -284,7 +292,7 @@ router.get("/api/calisanlar/user_modal/:id", async (req, res) => {
     const id = req.params.id;
 
     try {
-        const result = await db.query(user_info_modal_sql, [id]); // Direkt sorgu
+        const result = await db.query(user_info_modal_sql, [id]);
         if (result.rows.length > 0) {
             res.json(result.rows[0]);
         } else {
@@ -296,71 +304,32 @@ router.get("/api/calisanlar/user_modal/:id", async (req, res) => {
     }
 });
 router.patch("/api/calisanlar/user/:id", async (req, res) => {
-    const { id } = req.params;
-    const { first_name, last_name, email, phone, password } = req.body;
-    const updates = [];
-    const values = [];
-
-    // Yüklenen dosyanın yolu
-    const profileImage = req.file ? req.file.path : null;
-
-    if (first_name) {
-        updates.push("first_name = $" + (updates.length + 1));
-        values.push(first_name);
-    }
-
-    if (last_name) {
-        updates.push("last_name = $" + (updates.length + 1));
-        values.push(last_name);
-    }
-
-    if (email) {
-        updates.push("email = $" + (updates.length + 1));
-        values.push(email);
-    }
-
-    if (phone) {
-        updates.push("phone_number = $" + (updates.length + 1));
-        values.push(phone);
-    }
-
-    if (password) {
-        const password_hash = await bcrypt.hash(password, 10);
-        updates.push("password_hash = $" + (updates.length + 1));
-        values.push(password_hash);
-    }
-
-    if (profileImage) {
-        updates.push("profile_image = $" + (updates.length + 1));
-        values.push(profileImage);
-    }
-
-    if (updates.length === 0) {
-        return res.status(400).json({ error: "Güncellenecek bir alan bulunamadı" });
-    }
-
-    values.push(id);
-
-    const updateQuery = `
-        UPDATE employees 
-        SET ${updates.join(", ")} 
-        WHERE employee_id = $${values.length}
-        RETURNING *;
-    `;
-
+    console.log("Received PATCH request for ID:", req.params.id);
     try {
-        const result = await db.query(updateQuery, values);
+        const id = req.params.id;
+        const { first_name, last_name, email, phone, user_role } = req.body;
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: "Çalışan bulunamadı" });
+        // Profile URL'sini update ediyoruz
+        const result = await db.query(
+            `UPDATE Employee SET first_name = $1, last_name = $2, email = $3, phone_number = $4 WHERE employee_id = $5 RETURNING *`,
+            [first_name, last_name, email, phone, id] // Adjusted the parameter count
+        );
+
+        if (user_role) {
+            await db.query(
+                `UPDATE Employee_Roles SET role_id = $1 WHERE employee_id = $2`,
+                [user_role, id]
+            );
         }
 
-        res.json(result.rows[0]);
-    } catch (error) {
-        console.error("Güncelleme hatası:", error);
-        res.status(500).json({ error: "Veritabanı güncelleme sırasında bir hata oluştu" });
+        res.status(200).json({ message: "Kullanıcı bilgileri güncellendi", data: result.rows[0] });
+    } catch (err) {
+        console.error("Hata: ", err);
+        res.status(500).json({ error: "Bilgiler güncellenirken bir hata oluştu" });
     }
 });
+
+
 router.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {
         return res.status(500).json({ error: "Multer hatası: " + err.message });
@@ -557,6 +526,62 @@ router.post("/api/calisanlar/job", async (req, res) => {
     }
 });
 
+router.get("/api/is_unvanlari", async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM Job_Titles');
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/gorevler", async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM Job_Tasks');
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/bolumler", async (req, res) => {
+    console.log("Bölüm isteği alındı");
+    try {
+        const result = await db.query('SELECT * FROM Departments');
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.get("/api/birlikler", async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM Divisions');
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/calisan_turleri", async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM Employee_Types');
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get("/api/gruplar", async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM Groups');
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 
 router.get("/api/calisanlar/personal", async (req, res) => {
@@ -677,6 +702,9 @@ router.patch("/api/calisanlar/personal/:id", async (req, res) => {
         RETURNING *;
     `;
     values.push(id);
+
+    console.log(query);
+    console.log(values);
 
     try {
         const result = await db.query(query, values);
@@ -856,8 +884,6 @@ router.patch("/api/calisanlar/contact/:id", async (req, res) => {
 });
 
 
-
-
 router.get("/api/calisanlar/education", async (req, res) => {
     try {
         const result = await db.query(education_info_sql);
@@ -973,7 +999,7 @@ router.patch("/api/calisanlar/education/:id", async (req, res) => {
             return res.status(400).json({ error: "Güncellenmesi gereken alan belirtilmedi." });
         }
 
-        const query = `UPDATE Employee_Educations SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = $${fields.length + 1} RETURNING *`;
+        const query = `UPDATE Employee_Educations SET ${fields.join(", ")} WHERE employee_id = $${fields.length + 1} RETURNING *`;
         values.push(educationId);
 
         const result = await db.query(query, values);
@@ -1107,7 +1133,7 @@ router.patch("/api/calisanlar/body/:id", async (req, res) => {
             return res.status(400).json({ error: "Güncellenmesi gereken alan belirtilmedi." });
         }
 
-        const query = `UPDATE Employee_Body_Measurements SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = $${fields.length + 1} RETURNING *`;
+        const query = `UPDATE Employee_Body_Measurements SET ${fields.join(", ")} WHERE employee_id = $${fields.length + 1} RETURNING *`;
         values.push(measurementId);
 
         const result = await db.query(query, values);

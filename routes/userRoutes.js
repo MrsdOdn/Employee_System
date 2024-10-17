@@ -124,7 +124,8 @@ router.get("/api/user/:id", async (req, res) => {
 });
 router.patch("/api/user/:id", upload.single("profileImage"), async (req, res) => {
     const { id } = req.params;
-    const { first_name, last_name, email, phone, password } = req.body;
+    const { first_name, last_name, email, phone, password={} } = req.body;
+    console.log(req);
     const updates = [];
     const values = [];
 
@@ -152,9 +153,14 @@ router.patch("/api/user/:id", upload.single("profileImage"), async (req, res) =>
     }
 
     if (password) {
-        const password_hash = await bcrypt.hash(password, 10);
+        const user = await getUserById(id);
+        const isMatch = await bcrypt.compare(password.currentPassword, user.password_hash);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Current password is incorrect" });
+        }
+        const hashedPassword = await bcrypt.hash(password.newPassword, 10);
         updates.push("password_hash = $" + (updates.length + 1));
-        values.push(password_hash);
+        values.push(hashedPassword);
     }
 
     if (profileImage) {

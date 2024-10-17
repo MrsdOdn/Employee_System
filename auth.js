@@ -30,7 +30,7 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-    console.log('User serialized:', user);
+    /* console.log('User serialized:', user); */
     done(null, user.employee_id);
 });
 
@@ -91,10 +91,8 @@ router.post("/register", async (req, res) => {
     }
 });
 
-
-// Giriş rotası
 router.post("/login", passport.authenticate("local", {
-    successRedirect: "user/home", //ilerleyen zamanda değişecek.
+    successRedirect: "user/home",
     failureRedirect: "/login",
     failureFlash: true
 }));

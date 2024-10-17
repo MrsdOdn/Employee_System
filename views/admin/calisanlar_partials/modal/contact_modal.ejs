@@ -1,0 +1,126 @@
+<div
+  class="modal fade"
+  id="editContactModal"
+  tabindex="-1"
+  aria-labelledby="editContactModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content black-backend">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editContactModalLabel">
+          İletişim Bilgilerini Düzenle
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Kapat"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editContactForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputAddressType"
+                >Adres Tipi</label
+              >
+              <input
+                class="form-control"
+                id="modalInputAddressType"
+                type="text"
+                placeholder="Adres tipi giriniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputEmergencyContact"
+                >Acil İletişim Bilgisi</label
+              >
+              <input
+                class="form-control"
+                id="modalInputEmergencyContact"
+                type="text"
+                placeholder="Acil iletişim giriniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputCity">Şehir</label>
+              <input
+                class="form-control"
+                id="modalInputCity"
+                type="text"
+                placeholder="Şehir giriniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputState">Eyalet</label>
+              <input
+                class="form-control"
+                id="modalInputState"
+                type="text"
+                placeholder="Eyalet giriniz"
+              />
+            </div>
+            <div class="col-md-12 mb-3">
+              <label class="small mb-1" for="modalInputFullAddress"
+                >Tam Adres</label
+              >
+              <textarea
+                class="form-control"
+                id="modalInputFullAddress"
+                placeholder="Tam adresi giriniz"
+              ></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Kapat
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="modalContactSaveChanges"
+        >
+          Değişiklikleri Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $("#modalContactSaveChanges").click(async function () {
+    const updatedContactData = {
+      address_type: $("#modalInputAddressType").val(),
+      city: $("#modalInputCity").val(),
+      state: $("#modalInputState").val(),
+      full_address: $("#modalInputFullAddress").val(),
+      emergency_contact: $("#modalInputEmergencyContact").val(),
+    };
+
+    try {
+      const url = "/admin/api/calisanlar/contact/" + userid;
+      const response = await $.ajax({
+        type: "PATCH",
+        url: url,
+        data: JSON.stringify(updatedContactData),
+        contentType: "application/json",
+        success: function () {
+          showToast("İletişim Bilgileri", "Başarı ile değiştirildi!");
+          $("#editContactModal").modal("hide");
+          $("#contact_info").DataTable().ajax.reload(null, false);
+        },
+        error: function (jqXHR) {
+          showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+          console.error("Bilgiler güncellenirken bir hata oluştu.", jqXHR);
+        },
+      });
+    } catch (jqXHR) {
+      console.error("Hata:", jqXHR.status, jqXHR.statusText);
+    }
+  });
+</script>

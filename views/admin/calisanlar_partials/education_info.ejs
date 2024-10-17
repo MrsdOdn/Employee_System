@@ -1,3 +1,4 @@
+<%- include("./modal/education_modal.ejs") %>
 <div class="container mb-3">
   <table id="education_info" class="display" style="width: 100%">
     <thead>
@@ -36,6 +37,33 @@
     }
     return text;
   }
+
+  function editEducation(apiUrl, userId) {
+    console.log(apiUrl, userId);
+    userid = userId;
+    console.log(userid);
+
+    $.ajax({
+      url: apiUrl,
+      method: "GET",
+      success: function (data) {
+        console.log(data);
+        $("#modalInputInstitutionType").val(data.institution_type);
+        $("#modalInputInstitutionName").val(data.institution_name);
+        $("#modalInputDepartments").val(data.department);
+        $("#modalInputStartYear").val(data.start_year);
+        $("#modalInputEndYear").val(data.end_year);
+        $("#modalInputDegree").val(data.degree);
+
+        $("#editEducationInfoModal").modal("show");
+      },
+      error: function (err) {
+        showToast("Eğitim bilgileri alınırken", "Bir hata oluştu");
+        console.error("Eğitim bilgileri alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
   $(document).ready(function () {
     var table = $("#education_info").DataTable({
       ajax: {
@@ -89,14 +117,14 @@
         {
           data: "employee_id",
           render: function (data) {
-            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/education/${data}', '${data}')">
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="editEducation('/admin/api/calisanlar/education/${data}', '${data}')">
                     <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
                     <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/education/${data}', ${data},'#education_info')">
                     <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;
           },
         },
       ],
-      dom: "Blfrtip", // Butonlar ve filtreler için yapılandırma
+      dom: "Blfrtip",
       buttons: [
         {
           extend: "colvis",

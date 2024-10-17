@@ -1,0 +1,213 @@
+<div
+  class="modal fade"
+  id="editPersonalInfoModal"
+  tabindex="-1"
+  aria-labelledby="editPersonalInfoModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content black-backend">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editPersonalInfoModalLabel">
+          Kişisel Bilgileri Düzenle
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Kapat"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editPersonalInfoForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputBirthDate"
+                >Doğum Tarihi</label
+              >
+              <input
+                class="form-control"
+                id="modalInputBirthDate"
+                type="date"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputNationality"
+                >Uyruk</label
+              >
+              <input
+                class="form-control"
+                id="modalInputNationality"
+                type="text"
+                placeholder="Uyruk giriniz"
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="small mb-1" for="modalSelectGender">Cinsiyet</label>
+              <select class="form-control" id="modalSelectGender">
+                <option value="" disabled selected hidden>
+                  Cinsiyeti seçin
+                </option>
+                <option value="male">Erkek</option>
+                <option value="female">Kadın</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="small mb-1" for="modalSelectMaritalStatus"
+                >Medeni Durum</label
+              >
+              <select class="form-control" id="modalSelectMaritalStatus">
+                <option value="" disabled selected hidden>
+                  Medeni durumu seçin
+                </option>
+                <option value="single">Bekar</option>
+                <option value="married">Evli</option>
+                <option value="widowed">Dul</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="small mb-1" for="modalSelectBloodType"
+                >Kan Grubu</label
+              >
+              <select class="form-control" id="modalSelectBloodType">
+                <option value="" disabled selected hidden>
+                  Kan grubunu seçin
+                </option>
+                <option value="0rh+">0 Rh+</option>
+                <option value="0rh-">0 Rh-</option>
+                <option value="Ahr+">A Rh+</option>
+                <option value="Ahr-">A Rh-</option>
+                <option value="Bhr+">B Rh+</option>
+                <option value="Bhr-">B Rh-</option>
+                <option value="ABhr+">AB Rh+</option>
+                <option value="ABhr-">AB Rh-</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputMotherName"
+                >Anne Adı</label
+              >
+              <input
+                class="form-control"
+                id="modalInputMotherName"
+                type="text"
+                placeholder="Anne adını giriniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputFatherName"
+                >Baba Adı</label
+              >
+              <input
+                class="form-control"
+                id="modalInputFatherName"
+                type="text"
+                placeholder="Baba adını giriniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalSelectMilitaryStatus"
+                >Askerlik Durumu</label
+              >
+              <select class="form-control" id="modalSelectMilitaryStatus">
+                <option value="" disabled selected hidden>
+                  Askerlik durumunu seçin
+                </option>
+                <option value="completed">Tamamlandı</option>
+                <option value="exempt">Muaf</option>
+                <option value="postponed">Ertelendi</option>
+                <option value="not_completed">Tamamlanmadı</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalSelectEducationLevel"
+                >Eğitim Durumu</label
+              >
+              <select class="form-control" id="modalSelectEducationLevel">
+                <option value="" disabled selected hidden>
+                  Eğitim durumunu seçin
+                </option>
+                <option value="orta_okul">Orta Okul</option>
+                <option value="lise">Lise</option>
+                <option value="lisans">Lisans</option>
+                <option value="yüksek_lisans">Yüksek Lisans</option>
+                <option value="doktara">Doktora</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputBirthPlace"
+                >Doğum Yeri</label
+              >
+              <input
+                class="form-control"
+                id="modalInputBirthPlace"
+                type="text"
+                placeholder="Doğum yerini giriniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputRegistrationNumber"
+                >Sicil Numarası</label
+              >
+              <input
+                class="form-control"
+                id="modalInputRegistrationNumber"
+                type="text"
+                placeholder="Kayıt numarasını giriniz"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Kapat
+        </button>
+        <button type="button" class="btn btn-primary" id="modalSaveChanges">
+          Değişiklikleri Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $("#modalSaveChanges").click(async function () {
+    console.log("clicked");
+    const updatedData = {
+      birth_date: new Date($("#modalInputBirthDate").val()).toISOString(),
+      gender: $("#modalSelectGender").val(),
+      nationality: $("#modalInputNationality").val(),
+      marital_status: $("#modalSelectMaritalStatus").val(),
+      blood_type: $("#modalSelectBloodType").val(),
+      mother_name: $("#modalInputMotherName").val(),
+      father_name: $("#modalInputFatherName").val(),
+      military_status: $("#modalSelectMilitaryStatus").val(),
+      education_level: $("#modalSelectEducationLevel").val(),
+      birth_place: $("#modalInputBirthPlace").val(),
+      registration_number: $("#modalInputRegistrationNumber").val(),
+    };
+    console.log(userid);
+    try {
+      const url = "/admin/api/calisanlar/personal/" + userid;
+      const response = await $.ajax({
+        type: "PATCH",
+        url: url,
+        data: JSON.stringify(updatedData),
+        contentType: "application/json",
+        success: function () {
+          showToast("Kişisel Bilgiler", "Başarı ile değiştirildi!");
+          $("#editPersonalInfoModal").modal("hide");
+          $("#personal_info").DataTable().ajax.reload(null, false);
+        },
+        error: function (jqXHR) {
+          showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+          console.error("Bilgiler güncellenirken bir hata oluştu.", jqXHR);
+        },
+      });
+    } catch (jqXHR) {
+      console.error("Hata:", jqXHR.status, jqXHR.statusText);
+    }
+  });
+</script>

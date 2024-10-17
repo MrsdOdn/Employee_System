@@ -1,3 +1,4 @@
+<%- include("./modal/body_modal.ejs") %>
 <div class="container mb-3">
   <table id="body_info" class="display" style="width: 100%">
     <thead>
@@ -36,6 +37,32 @@
     }
     return text;
   }
+
+  function editBody(apiUrl, userId) {
+    console.log(apiUrl, userId);
+    userid = userId;
+    console.log(userid);
+
+    $.ajax({
+      url: apiUrl,
+      method: "GET",
+      success: function (data) {
+        $("#modalInputShoeSize").val(data.shoe_size);
+        $("#modalInputClothingSize").val(data.clothing_size);
+        $("#modalInputPantSize").val(data.pant_size);
+        $("#modalInputCoatSize").val(data.coat_size);
+        $("#modalInputGloveSize").val(data.glove_size);
+        $("#modalInputHelmetSize").val(data.helmet_size);
+
+        $("#editBodyMeasurementsModal").modal("show");
+      },
+      error: function (err) {
+        showToast("Beden bilgileri alınırken", "Bir hata oluştu");
+        console.error("Beden bilgileri alınırken bir hata oluştu.", err);
+      },
+    });
+  }
+
   $(document).ready(function () {
     var table = $("#body_info").DataTable({
       ajax: {
@@ -89,7 +116,7 @@
         {
           data: "employee_id",
           render: function (data) {
-            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/body/${data}', '${data}')">
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="editBody('/admin/api/calisanlar/body/${data}', '${data}')">
                     <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
                     <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/body/${data}', ${data},'#body_info')">
                     <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;

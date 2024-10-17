@@ -1,0 +1,156 @@
+<div
+  class="modal fade"
+  id="editBodyMeasurementsModal"
+  tabindex="-1"
+  aria-labelledby="editBodyMeasurementsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content black-backend">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editBodyMeasurementsModalLabel">
+          Beden Ölçüleri Detay
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Kapat"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editBodyMeasurementsForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputShoeSize"
+                >Ayakkabı Numarası</label
+              >
+              <input
+                class="form-control"
+                id="modalInputShoeSize"
+                type="number"
+                min="35"
+                max="50"
+                step="0.5"
+                placeholder="Ayakkabı numarası seçiniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputClothingSize"
+                >Giysi Beden</label
+              >
+              <select class="form-control" id="modalInputClothingSize">
+                <option value="">Giysi bedeni seçiniz</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputPantSize"
+                >Pantolon Beden</label
+              >
+              <input
+                class="form-control"
+                id="modalInputPantSize"
+                type="number"
+                min="28"
+                max="44"
+                step="1"
+                placeholder="Pantolon bedeni seçiniz"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputCoatSize"
+                >Ceket Beden</label
+              >
+              <select class="form-control" id="modalInputCoatSize">
+                <option value="">Ceket bedeni seçiniz</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputGloveSize"
+                >Eldiven Beden</label
+              >
+              <select class="form-control" id="modalInputGloveSize">
+                <option value="">Eldiven bedeni seçiniz</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputHelmetSize"
+                >Kask Beden</label
+              >
+              <select class="form-control" id="modalInputHelmetSize">
+                <option value="">Kask bedeni seçiniz</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Kapat
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="modalSaveBodyMeasurements"
+        >
+          Değişiklikleri Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $("#modalSaveBodyMeasurements").click(async function () {
+    const updatedData = {
+      shoe_size: $("#modalInputShoeSize").val(),
+      clothing_size: $("#modalInputClothingSize").val(),
+      pant_size: $("#modalInputPantSize").val(),
+      coat_size: $("#modalInputCoatSize").val(),
+      glove_size: $("#modalInputGloveSize").val(),
+      helmet_size: $("#modalInputHelmetSize").val(),
+    };
+    console.log("userid" + userid);
+    try {
+      const url = "/admin/api/calisanlar/body/" + userid;
+      const response = await $.ajax({
+        type: "PATCH",
+        url: url,
+        data: JSON.stringify(updatedData),
+        contentType: "application/json",
+        success: function (data) {
+          showToast("Beden Ölçüleri Bilgiler", "Başarı ile değiştirildi!");
+          $("#editBodyMeasurementsModal").modal("hide");
+          $("#body_info").DataTable().ajax.reload(null, false);
+        },
+      });
+    } catch (jqXHR) {
+      console.error("Hata:", jqXHR.status, jqXHR.statusText);
+      showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+    }
+  });
+</script>

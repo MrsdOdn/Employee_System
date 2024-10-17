@@ -1,3 +1,4 @@
+<%- include("./modal/personal_modal.ejs") %>
 <div class="container mb-3">
   <table id="personal_info" class="display" style="width: 100%">
     <thead>
@@ -39,6 +40,39 @@
 </div>
 
 <script>
+  function editPersonal(apiUrl, userId) {
+    console.log(apiUrl, userId);
+    userid = userId;
+    console.log(userid);
+
+    $.ajax({
+      url: apiUrl,
+      method: "GET",
+      success: function (data) {
+        console.log(data);
+        $(userid).val(data.employee_id)
+        const birthDate = new Date(data.birth_date);
+        const formattedDate = birthDate.toISOString().split("T")[0];
+        $("#modalInputBirthDate").val(formattedDate);
+        $("#modalInputNationality").val(data.nationality);
+        $("#modalSelectGender").val(data.gender || "");
+        $("#modalSelectMaritalStatus").val(data.marital_status || "");
+        $("#modalSelectBloodType").val(data.blood_type || "");
+        $("#modalInputMotherName").val(data.mother_name);
+        $("#modalInputFatherName").val(data.father_name);
+        $("#modalSelectMilitaryStatus").val(data.military_status || "");
+        $("#modalSelectEducationLevel").val(data.education_level || "");
+        $("#modalInputBirthPlace").val(data.birth_place);
+        $("#modalInputRegistrationNumber").val(data.registration_number);
+
+        $("#editPersonalInfoModal").modal("show");
+      },
+      error: function (err) {
+        showToast("Kullanıcı bilgileri alınırken", "Bir hata oluştu");
+        console.error("Kullanıcı bilgileri alınırken bir hata oluştu.", err);
+      },
+    });
+  }
   $(document).ready(function () {
     var table = $("#personal_info").DataTable({
       ajax: {
@@ -117,7 +151,7 @@
         {
           data: "employee_id",
           render: function (data, type, row) {
-            return `<a href="#" class="btn btn-warning btn-sm" onclick="edit('/admin/api/calisanlar/personal/${data}', '${data}')">
+            return `<a href="#" class="btn btn-warning btn-sm" onclick="editPersonal('/admin/api/calisanlar/personal/${data}', '${data}')">
                     <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon></a>
                     <a href="#" class="btn btn-danger btn-sm"  onclick="confirmDelete('/admin/api/calisanlar/personal/${data}', ${data},'#personal_info')">
                     <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon></a>`;

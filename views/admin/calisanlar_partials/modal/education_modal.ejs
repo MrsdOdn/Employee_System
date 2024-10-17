@@ -1,0 +1,146 @@
+<div
+  class="modal fade"
+  id="editEducationInfoModal"
+  tabindex="-1"
+  aria-labelledby="editEducationInfoModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content black-backend">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editEducationInfoModalLabel">
+          Eğitim Bilgilerini Düzenle
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Kapat"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editEducationInfoForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputInstitutionType"
+                >Eğitim Kurumu Türü</label
+              >
+              <input
+                class="form-control"
+                id="modalInputInstitutionType"
+                type="text"
+                placeholder="Eğitim kurumu türünü giriniz"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputInstitutionName"
+                >Eğitim Kurumu Adı</label
+              >
+              <input
+                class="form-control"
+                id="modalInputInstitutionName"
+                type="text"
+                placeholder="Eğitim kurumu adını giriniz"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputDepartments"
+                >Bölüm</label
+              >
+              <input
+                class="form-control"
+                id="modalInputDepartments"
+                type="text"
+                placeholder="Bölüm giriniz"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputStartYear"
+                >Başlangıç Yılı</label
+              >
+              <input
+                class="form-control"
+                id="modalInputStartYear"
+                type="number"
+                placeholder="Başlangıç yılını giriniz"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputEndYear"
+                >Bitiş Yılı</label
+              >
+              <input
+                class="form-control"
+                id="modalInputEndYear"
+                type="number"
+                placeholder="Bitiş yılını giriniz"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="small mb-1" for="modalInputDegree">Derece</label>
+              <input
+                class="form-control"
+                id="modalInputDegree"
+                type="text"
+                placeholder="Derece giriniz"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Kapat
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="modalSaveEducationChanges"
+        >
+          Değişiklikleri Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $("#modalSaveEducationChanges").click(async function () {
+    console.log("clicked");
+    const updatedData = {
+      institution_type: $("#modalInputInstitutionType").val(),
+      institution_name: $("#modalInputInstitutionName").val(),
+      department: $("#modalInputDepartments").val(),
+      start_year: $("#modalInputStartYear").val(),
+      end_year: $("#modalInputEndYear").val(),
+      degree: $("#modalInputDegree").val(),
+    };
+    console.log("Güncellenen Veri:", updatedData);
+    console.log("userid:", userid);
+
+    try {
+      const url = "/admin/api/calisanlar/education/" + userid;
+      await $.ajax({
+        type: "PATCH",
+        url: url,
+        data: JSON.stringify(updatedData),
+        contentType: "application/json",
+        success: function () {
+          showToast("Eğitim Bilgileri", "Başarı ile değiştirildi!");
+          $("#editEducationInfoModal").modal("hide");
+          $("#education_info").DataTable().ajax.reload(null, false);
+        },
+      });
+    } catch (jqXHR) {
+      console.error("Hata:", jqXHR.status, jqXHR.statusText);
+      showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+    }
+  });
+</script>
