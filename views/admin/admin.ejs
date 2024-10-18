@@ -1,1 +1,296 @@
-<h1>Admin Paneli</h1>
+<div class="container mb-3">
+  <h2 class="my-4">Çalışan Takip Taplosu</h2>
+  <div class="table-responsive">
+    <table
+      id="attendance_table"
+      class="table table-striped table-bordered"
+      style="width: 100%"
+    >
+      <thead>
+        <tr>
+          <th>Çalışan ID</th>
+          <th>Ad-Soyad</th>
+          <th>Tarih</th>
+          <th>Giriş Saati</th>
+          <th>Çıkış Saati</th>
+          <th>Durum</th>
+          <th>İşlem</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <th>Çalışan ID</th>
+          <th>Ad-Soyad</th>
+          <th>Tarih</th>
+          <th>Giriş Saati</th>
+          <th>Çıkış Saati</th>
+          <th>Durum</th>
+          <th>İşlem</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  
+  <h2>Departmanlara Göre İşçi Dağılımı</h2>
+  <div class="row">
+    <div class="col-md-6">
+      <canvas id="departmentChart" width="400" height="400"></canvas>
+    </div>
+    <div class="col-md-6">
+      <canvas id="statusChart" width="400" height="400"></canvas>
+    </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    var table = $("#attendance_table").DataTable({
+      ajax: {
+        url: "/admin/api/attendance/daily",
+        dataSrc: "",
+      },
+      columns: [
+        { data: "employee_id" },
+        {
+          data: "first_name",
+          render: function (data, type, row) {
+            return data ? `${data} ${row.last_name || "N/A"}` : "N/A";
+          },
+        },
+        {
+          data: "attendance_date",
+          render: function (data) {
+            return moment(data).format("DD/MM/YYYY");
+          },
+        },
+        {
+          data: "check_in_time",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "check_out_time",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "status",
+          render: function (data) {
+            return data || "N/A";
+          },
+        },
+        {
+          data: "employee_id",
+          render: function (data) {
+            return `
+              <a href="#" class="btn btn-warning btn-sm" onclick="editAttendance('/api/attendance/${data}')">
+                <ion-icon name="create-outline" data-toggle="tooltip" title="DÜZENLE"></ion-icon>
+              </a>
+              <a href="#" class="btn btn-danger btn-sm" onclick="confirmDelete('/api/attendance/${data}', ${data}, '#attendance_table')">
+                <ion-icon name="trash" data-toggle="tooltip" title="SİL"></ion-icon>
+              </a>`;
+          },
+        },
+      ],
+      dom: "Blfrtip",
+      buttons: [
+        {
+          extend: "colvis",
+          text: '<i class="fa fa-eye" data-toggle="tooltip" title="Kolonları Göster/Gizle"></i>',
+        },
+        {
+          extend: "excelHtml5",
+          text: '<i class="fa fa-file-excel-o" data-toggle="tooltip" data-original-title="Excel\'e Aktar"></i>',
+          title: "Çalışanlar " + moment(new Date()).format("DD-MM-YYYY"),
+          exportOptions: {
+            columns: ":visible",
+          },
+        },
+        {
+          extend: "print",
+          text: '<i class="fa fa-print" data-toggle="tooltip" data-original-title="Yazdır"></i>',
+          title: "Çalışanlar " + moment(new Date()).format("DD-MM-YYYY"),
+          exportOptions: {
+            columns: ":visible",
+          },
+        },
+      ],
+      fixedColumns: {
+        leftColumns: 1,
+      },
+      fixedHeader: true,
+      scrollCollapse: true,
+      searching: true,
+      scrollX: true,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"],
+      ],
+      language: {
+        lengthMenu: " _MENU_ Sayfa başı kayıt Sayısı",
+        zeroRecords: "Kayıt bulunamadı",
+        info: "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+        infoEmpty: "Kayıt yok",
+        infoFiltered: "(toplam _MAX_ kayıttan filtrelendi)",
+        search: "Ara:",
+        paginate: {
+          first: "İlk",
+          last: "Son",
+          next: "Sonraki",
+          previous: "Önceki",
+        },
+      },
+      initComplete: function () {
+        this.api()
+          .columns()
+          .every(function () {
+            let column = this;
+            let title = column.footer().textContent;
+            let input = document.createElement("input");
+            input.placeholder = title;
+            column.footer().replaceChildren(input);
+
+            input.addEventListener("keyup", function () {
+              if (column.search() !== input.value) {
+                column.search(input.value).draw();
+              }
+            });
+          });
+      },
+    });
+    fetchStatusData();
+    fetchDepartmentData();
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+
+  function fetchStatusData() {
+    $.ajax({
+      url: "/admin/api/attendance",
+      method: "GET",
+      success: function (response) {
+        const statusCounts = {
+          present: 0,
+          leave: 0,
+          absent: 0,
+          sick: 0,
+          late: 0,
+          halfDay: 0,
+        };
+
+        response.forEach((row) => {
+          switch (row.status) {
+            case "Present":
+              statusCounts.present += parseInt(row.count, 10);
+              break;
+            case "Leave":
+              statusCounts.leave += parseInt(row.count, 10);
+              break;
+            case "Absent":
+              statusCounts.absent += parseInt(row.count, 10);
+              break;
+            case "Sick":
+              statusCounts.sick += parseInt(row.count, 10);
+              break;
+            case "Late":
+              statusCounts.late += parseInt(row.count, 10);
+              break;
+            case "Half Day":
+              statusCounts.halfDay += parseInt(row.count, 10);
+              break;
+            // İstenirse diğer durumlar için de case ekleyebilirsiniz
+          }
+        });
+
+        renderStatusChart(statusCounts);
+      },
+      error: function (err) {
+        console.error("Veriler çekilemedi", err);
+      },
+    });
+  }
+
+  function renderStatusChart(statusCounts) {
+    const ctx = document.getElementById("statusChart").getContext("2d");
+    new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: [
+          "İşte",
+          "İzinli",
+          "Gelmemiş",
+          "Hastalık",
+          "Geç Kalma",
+          "Yarım Gün",
+        ],
+        datasets: [
+          {
+            data: [
+              statusCounts.present,
+              statusCounts.leave,
+              statusCounts.absent,
+              statusCounts.sick,
+              statusCounts.late,
+              statusCounts.halfDay,
+            ],
+            backgroundColor: [
+              "#1E90FF", // İşte
+              "#FF6347", // İzinli
+              "#FFD700", // Gelmemiş
+              "#32CD32", // Hastalık
+              "#FF4500", // Geç Kalma
+              "#FF8C00", // Yarım Gün
+            ],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+      },
+    });
+  }
+
+  function fetchDepartmentData() {
+    $.ajax({
+      url: "/admin/api/department-status",
+      method: "GET",
+      success: function (response) {
+        const departmentCounts = {};
+
+        response.forEach((row) => {
+          departmentCounts[row.department] = row.count;
+        });
+
+        renderDepartmentChart(departmentCounts);
+      },
+      error: function (err) {
+        console.error("Departman verileri çekilemedi", err);
+      },
+    });
+  }
+
+  function renderDepartmentChart(departmentCounts) {
+    const departmentCtx = document
+      .getElementById("departmentChart")
+      .getContext("2d");
+    new Chart(departmentCtx, {
+      type: "bar",
+      data: {
+        labels: Object.keys(departmentCounts),
+        datasets: [
+          {
+            label: "Çalışan Sayısı",
+            data: Object.values(departmentCounts),
+            backgroundColor: "#36a2eb",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+      },
+    });
+  }
+</script>

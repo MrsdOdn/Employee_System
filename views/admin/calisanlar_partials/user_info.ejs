@@ -45,6 +45,7 @@
         userRoleSelect.empty();
         userRoleSelect.append('<option value="">Yetki Seçin</option>');
         roles.forEach((role) => {
+          /* console.log(role); */
           userRoleSelect.append(
             `<option value="${role.role_id}">${role.role_name}</option>`
           );
@@ -55,11 +56,9 @@
       },
     });
   }
-  $("#profileModal").on("show.bs.modal", function () {
-    loadRoles();
-  });
 
   function edit(apiUrl, userId) {
+    loadRoles();
     console.log(apiUrl, userId);
     userid = userId;
     console.log(userid);

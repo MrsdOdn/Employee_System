@@ -39,12 +39,14 @@
             <div class="col-md-6 mb-3">
               <label for="department" class="form-label">Bölüm</label>
               <select class="form-control" id="department">
+                <option value="" disabled selected hidden>Bölüm Seçin</option>
                 <!-- Options populated from the backend -->
               </select>
             </div>
             <div class="col-md-6 mb-3">
               <label for="division" class="form-label">Birlik</label>
               <select class="form-control" id="division">
+                <option value="" disabled selected hidden>Birim Seçin</option>
                 <!-- Options populated from the backend -->
               </select>
             </div>
@@ -56,12 +58,16 @@
           <div class="mb-3">
             <label for="employeeType" class="form-label">Çalışan Türü</label>
             <select class="form-control" id="employeeType">
+              <option value="" disabled selected hidden>
+                Çalışan Türü Seçin
+              </option>
               <!-- Options populated from the backend -->
             </select>
           </div>
           <div class="mb-3">
             <label for="groupName" class="form-label">Grup Adı</label>
             <select class="form-control" id="groupName">
+              <option value="" disabled selected hidden>Gurup Seçin</option>
               <!-- Options populated from the backend -->
             </select>
           </div>
@@ -103,51 +109,52 @@
 </div>
 
 <script>
+  $("#editJobBtn").click(function () {
+    $(
+      "#jobTitle, #jobTask, #department, #division, #jobDescription, #employeeType, #groupName"
+    ).removeAttr("disabled");
+    $("#editJobBtn").hide();
+    $("#saveJobBtn, #cancelJobBtn").show();
+  });
 
+  $("#cancelJobBtn").click(function () {
+    $(
+      "#jobTitle, #jobTask, #department, #division, #jobDescription, #employeeType, #groupName"
+    ).attr("disabled", true);
+    $("#saveJobBtn, #cancelJobBtn").hide();
+    $("#editJobBtn").show();
+  });
 
-    $("#editJobBtn").click(function () {
-      $(
-        "#jobTitle, #jobTask, #department, #division, #jobDescription, #employeeType, #groupName"
-      ).removeAttr("disabled");
-      $("#editJobBtn").hide();
-      $("#saveJobBtn, #cancelJobBtn").show();
+  $("#jobInfoForm").on("submit", function (event) {
+    event.preventDefault();
+    const userId = userid;
+    const jobData = {
+      title: $("#jobTitle").val(),
+      task: $("#jobTask").val(),
+      department: $("#department").val(),
+      division: $("#division").val(),
+      job_description: $("#jobDescription").val(),
+      employee_type: $("#employeeType").val(),
+      group_id: $("#groupName").val(),
+      employment_start_date: $("#startDate").val(),
+      termination_date: $("#terminationDate").val(),
+    };
+    console.log(jobData);
+
+    $.ajax({
+      url: `/admin/api/calisanlar/job/${userid}`,
+      method: "PATCH",
+      data: jobData,
+      success: function (data) {
+        showToast("Bilgiler", "Güncellendi");
+        console.log("Job info updated successfully:", data);
+        $("#job-info").DataTable().ajax.reload(null, false);
+        $("#jobInfoModal").modal("hide");
+      },
+      error: function (jqXHR) {
+        showToast("Bir hata oluştu: ", " " + jqXHR.responseText);
+        console.error("Bilgiler güncellenirken bir hata oluştu.", jqXHR);
+      },
     });
-
-    $("#cancelJobBtn").click(function () {
-      $(
-        "#jobTitle, #jobTask, #department, #division, #jobDescription, #employeeType, #groupName"
-      ).attr("disabled", true);
-      $("#saveJobBtn, #cancelJobBtn").hide();
-      $("#editJobBtn").show();
-    });
-
-    $("#jobInfoForm").on("submit", function (event) {
-      event.preventDefault();
-      const userId = userid;
-      const jobData = {
-        title: $("#jobTitle").val(),
-        task: $("#jobTask").val(),
-        department: $("#department").val(),
-        division: $("#division").val(),
-        job_description: $("#jobDescription").val(),
-        employee_type: $("#employeeType").val(),
-        group_id: $("#groupName").val(),
-        employment_start_date: $("#startDate").val(),
-        termination_date: $("#terminationDate").val(),
-      };
-
-      $.ajax({
-        url: `/api/calisanlar/job/${userid}`,
-        method: "PATCH",
-        data: jobData,
-        success: function (data) {
-          // Handle success (e.g., reload job info or show a message)
-          console.log("Job info updated successfully:", data);
-          $("#jobInfoModal").modal("hide");
-        },
-        error: function (error) {
-          console.error("Error updating job info:", error);
-        },
-      });
-    });
+  });
 </script>

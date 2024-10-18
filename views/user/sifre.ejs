@@ -1,4 +1,4 @@
-<div class="container d-flex justify-content-center align-items-center vh-100">
+<div class="container d-flex justify-content-center align-items-center ">
   <div class="row">
     <div class="col-md-12">
       <div class="card shadow-lg black-backend">
@@ -86,22 +86,6 @@
 </div>
 
 <script>
-  async function user() {
-    try {
-      const response = await $.ajax({
-        url: "/api/user", // Doğru URL'yi kullandığınızdan emin olun
-        method: "GET",
-        dataType: "json",
-      });
-
-      $("#employeeId").text(`Employee ID: ${response.employee_id}`);
-      return response.employee_id;
-    } catch (error) {
-      console.error("Hata:", error);
-      return null;
-    }
-  }
-
   $(document).ready(function () {
     $(".pass_show").append('<span class="ptxt">Show</span>');
 
@@ -126,11 +110,9 @@
         showToast("Yeni şifre ve onay şifre uyuşmuyor.");
         return;
       }
-      
 
       try {
-        const userId = await user();
-        const url = `/user/api/user/${userId}`;
+        const url = `/change-password`;
         const password = {
           currentPassword: currentPassword,
           newPassword: newPassword,

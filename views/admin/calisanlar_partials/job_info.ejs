@@ -79,7 +79,7 @@
 
   function loadDepartments() {
     $.ajax({
-      url: "/admin/api/bolumler", // Doğru URL'yi kontrol edin
+      url: "/admin/api/bolumler",
       method: "GET",
       success: function (departments) {
         const departmentSelect = $("#department");
@@ -158,15 +158,14 @@
     });
   }
 
-  $("#jobInfoModal").on("show.bs.modal", function () {
+  $("#jobInfoModal").on("show.bs.modal", function () {});
+  function editJob(apiUrl, jobId) {
     loadJobTitles();
     loadJobTasks();
     loadDepartments();
     loadDivisions();
     loadEmployeeTypes();
     loadGroups();
-  });
-  function editJob(apiUrl, jobId) {
     console.log(apiUrl, jobId);
     userid = jobId;
 
@@ -175,31 +174,29 @@
       method: "GET",
       success: function (data) {
         console.log(data);
-        $("#modalInputEmployeeId").val(data.employee_id);
-        $("#modalInputFirstName").val(data.first_name);
-        $("#modalInputLastName").val(data.last_name);
-        $("#modalInputTitle").val(data.title);
-        $("#modalInputTask").val(data.task);
-        $("#modalInputDivision").val(data.division);
-        $("#modalInputDepartment").val(data.department);
-        $("#modalInputJobDescription").val(data.job_description);
-        $("#modalInputEmployeeType").val(data.employee_type);
-        $("#modalInputGroupName").val(data.group_name || "");
-        const employmentStartDate = new Date(data.employment_start_date);
-        const formattedStartDate = employmentStartDate
-          .toISOString()
-          .split("T")[0];
-        $("#modalInputEmploymentStartDate").val(formattedStartDate);
-        const terminationDate = data.termination_date
-          ? new Date(data.termination_date)
-          : null;
-        const formattedTerminationDate = terminationDate
-          ? terminationDate.toISOString().split("T")[0]
-          : "";
-        $("#modalInputTerminationDate").val(formattedTerminationDate);
+
+        $("#jobTitle").val(data.job_title_id);
+        $("#jobTask").val(data.job_task_id);
+        $("#department").val(data.department_id);
+        $("#division").val(data.division_id);
+        $("#jobDescription").val(data.job_description_text || " ");
+        $("#employeeType").val(data.employee_type_id);
+        $("#groupName").val(data.group_id || "Grup Yok");
+        $("#startDate").val(
+          new Date(data.employment_start_date).toISOString().split("T")[0]
+        );
+
+        if (data.termination_date) {
+          $("#terminationDate").val(
+            new Date(data.termination_date).toISOString().split("T")[0]
+          );
+        } else {
+          $("#terminationDate").val("");
+        }
 
         $("#jobInfoModal").modal("show");
       },
+
       error: function (err) {
         showToast("İş bilgileri alınırken", "Bir hata oluştu");
         console.error("İş bilgileri alınırken bir hata oluştu.", err);
@@ -227,9 +224,13 @@
         { data: "title" },
         { data: "task" },
         {
-          data: "job_description",
+          data: "job_description_text",
           render: function (data) {
-            return `<span class="ellipsis">${ellipsis(data, 100)}</span>`;
+            if (data) {
+              return `<span class="ellipsis">${ellipsis(data, 100)}</span>`;
+            } else {
+              return "N/A";
+            }
           },
         },
         {
@@ -310,7 +311,6 @@
         },
       },
       initComplete: function () {
-        // Her sütun için footer'da arama kutuları oluştur
         this.api()
           .columns()
           .every(function () {

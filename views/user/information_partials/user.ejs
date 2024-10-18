@@ -102,6 +102,7 @@
       try {
         const userId = await user();
         const url = "/user/api/user/" + userId;
+        console.log(url);
 
         const data = await $.ajax({
           url: url,

@@ -13,6 +13,7 @@ import userRoutes from "./routes/userRoutes.js";
 import moment from "moment";
 import cors from "cors";
 import path from "path";
+import bcrypt from "bcrypt";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -49,16 +50,16 @@ app.set("view engine", "ejs");
 app.set("layout", "partials/layout");
 
 //kimlik sorgulama açılacak sonra
-/* app.use((req, res, next) => {
+app.use((req, res, next) => {
     const openRoutes = ['/', '/login', '/register'];
     if (!openRoutes.includes(req.path) && !req.isAuthenticated()) {
         return res.redirect("/login");
     }
     next();
-}); */
+});
 
 // Admin rotaları kontrol
-//app.use('/admin', authMiddleware.isAuthenticated, authMiddleware.isAdmin);
+app.use('/admin', authMiddleware.isAuthenticated, authMiddleware.isAdmin);
 
 app.use((req, res, next) => {
     if (req.isAuthenticated()) {
@@ -91,9 +92,10 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
     res.render("register", { layout: false });
 });
-app.patch('/change-password/:id', async (req, res) => {
+app.patch('/change-password', authMiddleware.isAuthenticated, async (req, res) => {
     console.log("Request body:", req.body);
-    const id = req.params.id;
+
+    const id = req.user.employee_id;
     const { currentPassword, newPassword } = req.body;
 
     try {
@@ -102,14 +104,10 @@ app.patch('/change-password/:id', async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
         const user = result.rows[0];
-
-        // Mevcut şifreyi kontrol ediyoruz
         const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
         if (!isMatch) {
             return res.status(401).json({ message: "Current password is incorrect" });
         }
-
-        // Yeni şifreyi hash'leyip güncelliyoruz
         const hashedNewPassword = await bcrypt.hash(newPassword, 10);
         await db.query("UPDATE employees SET password_hash = $1 WHERE employee_id = $2", [hashedNewPassword, id]);
 
@@ -119,8 +117,6 @@ app.patch('/change-password/:id', async (req, res) => {
         return res.status(500).json({ message: "An error occurred while changing the password" });
     }
 });
-
-
 app.get("/logout", (req, res) => {
     req.logout(function (err) {
         if (err) {

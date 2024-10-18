@@ -107,8 +107,7 @@
       const formData = new FormData();
       formData.append("profileImage", file);
       try {
-        const userId = await user();
-        const url = "/user/api/user/" + userId;
+        const url = "/user/api/user/" + userid;
 
         const response = await $.ajax({
           type: "PATCH",
@@ -120,10 +119,7 @@
             console.log("image" + data.profile_image);
             const profileImagePath = data.profile_image.replace(/\\/g, "/");
 
-            $(".img-account-profile").attr("src", "../" + profileImagePath);
-            $(
-              "body > div.container > div.navigation > ul > li:nth-child(1) > a > div > img"
-            ).attr("src", "../" + data.profile_image);
+            $("#profile_image").attr("src", "../" + profileImagePath);
             showToast(
               "Profil Resmi",
               "Başarı ile değiştirildi!"

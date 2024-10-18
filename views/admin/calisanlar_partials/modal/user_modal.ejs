@@ -1,4 +1,4 @@
-<%- include("../../../partials/image_upload.ejs") %>
+<%- include("../../../partials/image_upload_admin.ejs") %>
 <div
   class="modal fade"
   id="profileModal"
@@ -95,7 +95,9 @@
                     >Kullanıcı Yetkisi</label
                   >
                   <select class="form-control" id="user_role" readonly>
-                    <option value="">Yetki Seçin</option>
+                    <option value="" disabled selected hidden>
+                      Yetki Seçin
+                    </option>
                     <!-- Backend'den alınacak seçenekler burada dinamik olarak eklenecek -->
                   </select>
                 </div>
@@ -127,6 +129,7 @@
   </div>
 </div>
 <script>
+  /* let img_eid = ""; */
   $(document).ready(function () {
     $("#editBtn").click(function () {
       $("input").removeAttr("readonly");
@@ -153,6 +156,7 @@
         user_role: $("#user_role").val(),
       };
       console.log(updatedData);
+      /* img_eid = userid; */
       $.ajax({
         url: "/admin/api/calisanlar/user/" + userid,
         method: "PATCH",

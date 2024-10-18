@@ -30,6 +30,7 @@ const job_info_sql = `SELECT
             jd.description AS job_description,
             et.type_name AS employee_type,
             g.group_name AS group_name,
+            ep.job_description_text,
             ep.employment_start_date,
             ep.termination_date
         FROM 
@@ -124,7 +125,7 @@ router.get("/api/user/:id", async (req, res) => {
 });
 router.patch("/api/user/:id", upload.single("profileImage"), async (req, res) => {
     const { id } = req.params;
-    const { first_name, last_name, email, phone, password={} } = req.body;
+    const { first_name, last_name, email, phone, password = {} } = req.body;
     console.log(req);
     const updates = [];
     const values = [];
@@ -150,17 +151,6 @@ router.patch("/api/user/:id", upload.single("profileImage"), async (req, res) =>
     if (phone) {
         updates.push("phone_number = $" + (updates.length + 1));
         values.push(phone);
-    }
-
-    if (password) {
-        const user = await getUserById(id);
-        const isMatch = await bcrypt.compare(password.currentPassword, user.password_hash);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Current password is incorrect" });
-        }
-        const hashedPassword = await bcrypt.hash(password.newPassword, 10);
-        updates.push("password_hash = $" + (updates.length + 1));
-        values.push(hashedPassword);
     }
 
     if (profileImage) {
@@ -629,4 +619,52 @@ router.patch("/api/body/:id", async (req, res) => {
     }
 });
 
+router.get('/api/team/:department_id', async (req, res) => {
+    const departmentId = req.params.department_id;
+
+    try {
+        const result = await db.query(
+            `SELECT e.first_name, e.last_name, e.profile_image, d.department_name
+             FROM Employees e
+             JOIN Employee_Positions ep ON e.employee_id = ep.employee_id
+             JOIN Departments d ON ep.department = d.id
+             WHERE ep.department = $1`,
+            [departmentId]
+        );
+
+        console.log("Sorgu sonucu:", result.rows); // Gelen sonuçları konsola yazdır
+
+        if (result.rows.length > 0) {
+            res.json(result.rows);
+        } else {
+            res.status(404).json({ message: 'Bu departmanda çalışan hiç kimse yok.' });
+        }
+    } catch (err) {
+        console.error("Hata:", err);
+        res.status(500).json({ message: 'Bir hata oluştu: ' + err.message });
+    }
+});
+
+router.get('/api/user/department/:id', async (req, res) => {
+    const userId = req.params.id;
+    console.log("departman için id: " + userId);
+
+    try {
+        const result = await db.query(`
+            SELECT ep.department 
+            FROM Employee_Positions ep 
+            WHERE ep.employee_id = $1
+        `, [userId]);
+
+        if (result.rows.length > 0) {
+            res.json({ department_id: result.rows[0].department });
+            console.log("Departman ID:", result.rows[0].department);
+        } else {
+            res.status(404).json({ error: 'Departman bulunamadı' });
+        }
+    } catch (error) {
+        console.error('Hata:', error);
+        res.status(500).json({ error: 'İç sunucu hatası: ' + error.message });
+    }
+});
 export default router;

@@ -1,3 +1,123 @@
-<div>
-  <h1>hoş geldiniz</h1>
-</div>
+<link
+  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+  rel="stylesheet"
+/>
+<section id="team" class="team-area section-padding">
+  <div class="container">
+    <div class="section-title text-center">
+      <h2>Çalışma Arkadaşları</h2>
+      <p>Aynı bölümde çalışan iş arkadaşları.</p>
+    </div>
+    <div class="row" id="team-members">
+      <!-- Takım arkadaşları buraya eklenecek -->
+    </div>
+  </div>
+</section>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  const defaultImageUrl = "https://bootdey.com/img/Content/avatar/avatar2.png";
+
+  async function getUser() {
+    try {
+      const response = await $.ajax({
+        url: "/api/user",
+        method: "GET",
+        dataType: "json",
+      });
+
+      console.log("User Response:", response);
+      if (response && response.employee_id) {
+        $("#employeeId").text(`Employee ID: ${response.employee_id}`);
+        return response.employee_id;
+      } else {
+        throw new Error("Kullanıcı ID'si bulunamadı.");
+      }
+    } catch (error) {
+      console.error("Hata:", error);
+      alert("Kullanıcı bilgileri alınırken bir hata oluştu: " + error.message);
+      return null;
+    }
+  }
+
+  async function getDepartmentId(userId) {
+    try {
+      const response = await $.ajax({
+        url: `/user/api/user/department/${userId}`,
+        method: "GET",
+        dataType: "json",
+      });
+
+      console.log("Department ID Response:", response); // Gelen yanıtı konsola yazdır
+      if (response && response.department_id) {
+        return response.department_id;
+      } else {
+        throw new Error("Departman ID'si bulunamadı.");
+      }
+    } catch (error) {
+      console.error("Departman ID'si alınırken hata:", error);
+      alert("Departman bilgileri alınırken bir hata oluştu: " + error.message);
+      return null;
+    }
+  }
+
+  async function getTeamMembers(departmentId) {
+    try {
+      const response = await $.ajax({
+        url: `/user/api/team/${departmentId}`,
+        method: "GET",
+        dataType: "json",
+      });
+
+      console.log("Team Members Response:", response); // Gelen yanıtı konsola yazdır
+
+      const teamMembersContainer = $("#team-members");
+      teamMembersContainer.empty();
+
+      if (Array.isArray(response) && response.length > 0) {
+        response.forEach((member) => {
+          const profileImage = member.profile_image.replace(/\\/g, "/") || defaultImageUrl;
+          const profileImagePath = "../"+profileImage;
+
+          const colDiv = `
+                    <div class="col-lg-3 col-sm-6 col-xs-12 wow fadeInUp" 
+                         data-wow-duration="1s" 
+                         data-wow-delay="0.2s" 
+                         data-wow-offset="0" 
+                         style="visibility: visible;">
+                        <div class="our-team">
+                            <img src="${profileImagePath}" alt="${member.first_name} ${member.last_name}" />
+                            <div class="team-content">
+                                <h3 class="title">${member.first_name} ${member.last_name}</h3>
+                                <span class="post">${member.department_name}</span>
+                                <ul class="social">
+                                    <li><a class="fa fa-facebook" href="#"></a></li>
+                                    <li><a class="fa fa-twitter" href="#"></a></li>
+                                    <li><a class="fa fa-youtube" href="#"></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+          teamMembersContainer.append(colDiv);
+        });
+      } else {
+        teamMembersContainer.append(
+          "<p>Bu departmanda çalışan hiç kimse yok.</p>"
+        ); // Eğer yanıt boşsa kullanıcıya bilgi ver
+      }
+    } catch (error) {
+      console.error("Takım arkadaşları alınırken hata:", error);
+      alert("Takım arkadaşları alınırken bir hata oluştu: " + error.message);
+    }
+  }
+
+  $(document).ready(async function () {
+    const userId = await getUser();
+    if (userId) {
+      const departmentId = await getDepartmentId(userId);
+      if (departmentId) {
+        await getTeamMembers(departmentId);
+      }
+    }
+  });
+</script>

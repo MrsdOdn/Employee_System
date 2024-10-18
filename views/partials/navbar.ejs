@@ -41,13 +41,13 @@
       </li>
       <li data-active="calisanlar">
         <a href="/admin/calisanlar">
-          <span class="icon"><ion-icon name="skull"></ion-icon></span>
+          <span class="icon"><ion-icon name="people"></ion-icon></span>
           <span class="title">Calisanlar</span>
         </a>
       </li>
       <li data-active="aduyurular">
         <a href="/admin/duyurular">
-          <span class="icon"><ion-icon name="skull"></ion-icon></span>
+          <span class="icon"><ion-icon name="megaphone"></ion-icon></span>
           <span class="title">Admin Duyurular</span>
         </a>
       </li>
@@ -66,11 +66,12 @@
       </div>
       <div class="search">
         <label>
-          <input type="text" placeholder="Arama" />
+          <input type="text" id="searchInput" placeholder="Arama" />
           <ion-icon name="search"></ion-icon>
         </label>
       </div>
     </div>
+    <div id="searchResults" class="search-results"></div>
   </div>
 </div>
 <script>

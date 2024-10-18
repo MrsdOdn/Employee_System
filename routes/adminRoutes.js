@@ -38,45 +38,47 @@ WHERE
     e.employee_id = $1
 `;
 const job_info_sql = `SELECT 
-            e.employee_id,
-            e.first_name,
-            e.last_name,
-            jt.id,
-            jt.title_name AS title,
-            jta.id,
-            jta.task_name AS task,
-            d.id,
-            d.division_name AS division,
-            dept.id,
-            dept.department_name AS department,
-            jd.id,
-            jd.description AS job_description,
-            et.id,
-            et.type_name AS employee_type,
-            g.id,
-            g.group_name AS group_name,
-            ep.employment_start_date,
-            ep.termination_date
-        FROM 
-            Employee_Positions ep
-        JOIN 
-            Employees e ON ep.employee_id = e.employee_id
-        JOIN 
-            Job_Titles jt ON ep.title = jt.id
-        JOIN 
-            Job_Tasks jta ON ep.task = jta.id
-        JOIN 
-            Divisions d ON ep.division = d.id
-        JOIN 
-            Departments dept ON ep.department = dept.id
-        JOIN 
-            Job_Descriptions jd ON ep.job_description = jd.id
-        JOIN 
-            Employee_Types et ON ep.employee_type = et.id
-        LEFT JOIN 
-            Employee_Groups eg ON e.employee_id = eg.employee_id
-        LEFT JOIN 
-            Groups g ON eg.group_id = g.id`;
+    e.employee_id,
+    e.first_name,
+    e.last_name,
+    jt.id AS job_title_id,
+    jt.title_name AS title,
+    jta.id AS job_task_id,
+    jta.task_name AS task,
+    d.id AS division_id, 
+    d.division_name AS division,
+    dept.id AS department_id,
+    dept.department_name AS department,
+    jd.id AS job_description_id,
+    jd.description AS job_description,
+    et.id AS employee_type_id,
+    et.type_name AS employee_type,
+    g.id AS group_id,
+    g.group_name AS group_name,
+    ep.job_description_text,
+    ep.employment_start_date,
+    ep.termination_date
+FROM 
+    Employee_Positions ep
+JOIN 
+    Employees e ON ep.employee_id = e.employee_id
+JOIN 
+    Job_Titles jt ON ep.title = jt.id
+JOIN 
+    Job_Tasks jta ON ep.task = jta.id
+JOIN 
+    Divisions d ON ep.division = d.id
+JOIN 
+    Departments dept ON ep.department = dept.id
+JOIN 
+    Job_Descriptions jd ON ep.job_description = jd.id
+JOIN 
+    Employee_Types et ON ep.employee_type = et.id
+LEFT JOIN 
+    Employee_Groups eg ON e.employee_id = eg.employee_id
+LEFT JOIN 
+    Groups g ON eg.group_id = g.id
+`;
 const personal_info_sql = `SELECT 
     epi.*, 
     e.first_name, 
@@ -143,7 +145,6 @@ router.get("/", (req, res) => {
 router.get("/duyurular", (req, res) => {
     res.render("admin/aduyurular.ejs");
 });
-// Dinamik veriyi JSON formatında döndüren route
 router.get("/api/duyurular", async (req, res) => {
     try {
         const result = await db.query(announcement_sql);
@@ -304,30 +305,57 @@ router.get("/api/calisanlar/user_modal/:id", async (req, res) => {
     }
 });
 router.patch("/api/calisanlar/user/:id", async (req, res) => {
-    console.log("Received PATCH request for ID:", req.params.id);
-    try {
-        const id = req.params.id;
-        const { first_name, last_name, email, phone, user_role } = req.body;
+    const employeeId = req.params.id;
+    const { first_name, last_name, email, phone, user_role } = req.body;
 
-        // Profile URL'sini update ediyoruz
-        const result = await db.query(
-            `UPDATE Employee SET first_name = $1, last_name = $2, email = $3, phone_number = $4 WHERE employee_id = $5 RETURNING *`,
-            [first_name, last_name, email, phone, id] // Adjusted the parameter count
-        );
+    try {
+        const updateEmployeeQuery = `
+            UPDATE Employees
+            SET first_name = $1, last_name = $2, email = $3, phone_number = $4
+            WHERE employee_id = $5
+            RETURNING *;
+        `;
+        const employeeValues = [first_name, last_name, email, phone, employeeId];
+        const employeeResult = await db.query(updateEmployeeQuery, employeeValues);
 
         if (user_role) {
-            await db.query(
-                `UPDATE Employee_Roles SET role_id = $1 WHERE employee_id = $2`,
-                [user_role, id]
-            );
+            const currentRoleQuery = `
+                SELECT role_id FROM employee_roles
+                WHERE employee_id = $1;
+            `;
+            const currentRoleResult = await db.query(currentRoleQuery, [employeeId]);
+            if (currentRoleResult.rows.length > 0) {
+                const currentRoleId = currentRoleResult.rows[0].role_id;
+
+                if (currentRoleId !== user_role) {
+                    const deleteRoleQuery = `
+                        DELETE FROM employee_roles
+                        WHERE employee_id = $1;
+                    `;
+                    await db.query(deleteRoleQuery, [employeeId]);
+
+                    const updateRoleQuery = `
+                        INSERT INTO employee_roles (employee_id, role_id)
+                        VALUES ($1, $2);
+                    `;
+                    await db.query(updateRoleQuery, [employeeId, user_role]);
+                }
+            } else {
+                const insertRoleQuery = `
+                    INSERT INTO employee_roles (employee_id, role_id)
+                    VALUES ($1, $2);
+                `;
+                await db.query(insertRoleQuery, [employeeId, user_role]);
+            }
         }
 
-        res.status(200).json({ message: "Kullanıcı bilgileri güncellendi", data: result.rows[0] });
-    } catch (err) {
-        console.error("Hata: ", err);
-        res.status(500).json({ error: "Bilgiler güncellenirken bir hata oluştu" });
+        res.json(employeeResult.rows[0]);
+    } catch (error) {
+        console.error("Güncelleme hatası:", error);
+        res.status(500).json({ error: "Bilgiler güncellenirken bir hata oluştu." });
     }
 });
+
 
 
 router.use((err, req, res, next) => {
@@ -428,7 +456,6 @@ router.patch("/api/calisanlar/job/:id", async (req, res) => {
 
     const fields = [];
     const values = [];
-
     if (title) {
         fields.push("title = $1");
         values.push(title);
@@ -446,7 +473,7 @@ router.patch("/api/calisanlar/job/:id", async (req, res) => {
         values.push(division);
     }
     if (job_description) {
-        fields.push("job_description = $" + (values.length + 1));
+        fields.push("job_description_text = $" + (values.length + 1));
         values.push(job_description);
     }
     if (employee_type) {
@@ -465,7 +492,6 @@ router.patch("/api/calisanlar/job/:id", async (req, res) => {
         fields.push("group_id = $" + (values.length + 1));
         values.push(group_id);
     }
-
     if (fields.length === 0) {
         return res.status(400).json({ error: "Güncellenecek bir alan bulunamadı." });
     }
@@ -475,11 +501,11 @@ router.patch("/api/calisanlar/job/:id", async (req, res) => {
         WHERE employee_id = $${values.length + 1}
         RETURNING *;
     `;
+
     values.push(id);
 
     try {
         const result = await db.query(query, values);
-
         if (result.rows.length === 0) {
             return res.status(404).json({ error: "Çalışan bulunamadı." });
         }
@@ -490,6 +516,8 @@ router.patch("/api/calisanlar/job/:id", async (req, res) => {
         res.status(500).json({ error: "Veri güncellenirken bir hata oluştu." });
     }
 });
+
+
 router.post("/api/calisanlar/job", async (req, res) => {
     const {
         employee_id,
@@ -545,7 +573,6 @@ router.get("/api/gorevler", async (req, res) => {
     }
 });
 router.get("/api/bolumler", async (req, res) => {
-    console.log("Bölüm isteği alındı");
     try {
         const result = await db.query('SELECT * FROM Departments');
         res.json(result.rows);
@@ -1149,7 +1176,88 @@ router.patch("/api/calisanlar/body/:id", async (req, res) => {
     }
 });
 
+router.get("/api/attendance/daily", async (req, res) => {
+    const attendanceDate = req.query.date || new Date().toISOString().slice(0, 10); // Tarih parametresi, yoksa bugünün tarihi
+    try {
+        const query = `
+            SELECT a.employee_id, 
+                   e.first_name, 
+                   e.last_name, 
+                   a.attendance_date,
+                   a.check_in_time,
+                   a.check_out_time,
+                   a.status
+            FROM Attendance a
+            JOIN Employees e ON a.employee_id = e.employee_id
+            WHERE a.attendance_date = $1;
+        `;
+        const result = await db.query(query, [attendanceDate]);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Günlük katılım verileri alınırken bir hata oluştu:", error);
+        res.status(500).json({ error: "Günlük katılım verileri alınırken bir hata oluştu." });
+    }
+});
+router.get("/api/attendance", async (req, res) => {
+    try {
+        const query = `
+            SELECT status, COUNT(*) as count 
+            FROM Attendance 
+            WHERE attendance_date = $1 
+            GROUP BY status;
+        `;
+        const attendanceDate = req.query.date || new Date().toISOString().slice(0, 10); // Tarih parametresi
+        const result = await db.query(query, [attendanceDate]);
+        console.log(result);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Çalışan durumları alınırken bir hata oluştu:", error);
+        res.status(500).json({ error: "Çalışan durumları alınırken bir hata oluştu." });
+    }
+});
+router.delete("/api/attendance/:id", async (req, res) => {
+    try {
+        const employeeId = req.params.id; // URL parametresinden Çalışan ID'sini al
+        if (!employeeId) {
+            return res.status(400).json({ error: "Geçersiz Çalışan ID." });
+        }
 
+        const attendanceDate = new Date().toISOString().slice(0, 10); // Bugünün tarihi
+
+        const query = `
+            DELETE FROM Attendance 
+            WHERE employee_id = $1 AND attendance_date = $2 
+            RETURNING *; -- Silinen kaydı geri döndür
+        `;
+
+        const result = await db.query(query, [employeeId, attendanceDate]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Silinecek kayıt bulunamadı." });
+        }
+
+        res.status(200).json({ message: "Kayıt başarıyla silindi.", deletedRecord: result.rows[0] });
+    } catch (error) {
+        console.error("Devamsızlık kaydı silinirken bir hata oluştu:", error);
+        res.status(500).json({ error: "Devamsızlık kaydı silinirken bir hata oluştu." });
+    }
+});
+
+router.get("/api/department-status", async (req, res) => {
+    try {
+        const query = `
+            SELECT d.department_name AS department, COUNT(ep.employee_id) AS count
+            FROM Employee_Positions ep
+            JOIN Departments d ON ep.department = d.id
+            GROUP BY d.department_name;
+        `;
+        const result = await db.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Departman verileri alınırken bir hata oluştu:", error);
+        res.status(500).json({ error: "Departman verileri alınırken bir hata oluştu." });
+    }
+});
 
 
 export default router;
